@@ -91,7 +91,12 @@ class WorkoutReminderScheduler @Inject constructor(
 
     private fun scheduleAlarm(templateId: Long, templateName: String, triggerAtMillis: Long) {
         val pendingIntent = buildAlarmPendingIntent(templateId, templateName)
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+        try {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+        } catch (securityException: SecurityException) {
+            // Devices without SCHEDULE_EXACT_ALARM permission will throw here. WorkManager still
+            // enqueues the reminder, so we silently ignore the alarm fallback.
+        }
     }
 
     private fun buildAlarmPendingIntent(templateId: Long, templateName: String?): PendingIntent {

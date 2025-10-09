@@ -6,8 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.workoutlogger.ui.screens.dashboard.DashboardRoute
 import com.example.workoutlogger.ui.screens.heatmap.HeatmapRoute
 import com.example.workoutlogger.ui.screens.schedule.ScheduleRoute
@@ -100,11 +102,14 @@ fun WorkoutNavHost(
             }
         }
 
-        composable(AppDestination.Schedule.route) { backStackEntry ->
-            val workoutId = backStackEntry.arguments?.getString("workoutId")?.toLongOrNull()
-            if (workoutId != null) {
+        composable(
+            route = AppDestination.Schedule.route,
+            arguments = listOf(navArgument("templateId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val templateId = backStackEntry.arguments?.getLong("templateId")
+            if (templateId != null) {
                 ScheduleRoute(
-                    templateId = workoutId,
+                    templateId = templateId,
                     onBack = { navController.popBackStack() }
                 )
             }

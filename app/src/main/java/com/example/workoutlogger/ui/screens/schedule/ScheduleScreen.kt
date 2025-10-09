@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +21,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -89,7 +91,11 @@ private fun ScheduleScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.label_schedule_header)) }
+                title = { Text(text = stringResource(id = R.string.label_schedule_header)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -113,7 +119,13 @@ private fun ScheduleScreen(
             }
 
             Text(text = stringResource(id = R.string.label_select_time), style = MaterialTheme.typography.titleMedium)
-            Button(onClick = { timePicker.show() }) {
+            Button(
+                onClick = { timePicker.show() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
                 Text(text = stringResource(id = R.string.label_schedule_time_prefix, String.format("%02d:%02d", state.hour, state.minute)))
             }
 
@@ -125,7 +137,16 @@ private fun ScheduleScreen(
                 Switch(checked = state.enabled, onCheckedChange = onToggleEnabled)
             }
 
-            Button(onClick = onSave, enabled = state.days.isNotEmpty()) {
+            Button(
+                onClick = onSave,
+                enabled = state.days.isNotEmpty(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
                 Text(text = stringResource(id = R.string.action_save))
             }
         }

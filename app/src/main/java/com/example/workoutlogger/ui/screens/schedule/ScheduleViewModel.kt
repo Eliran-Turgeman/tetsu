@@ -25,7 +25,7 @@ class ScheduleViewModel @Inject constructor(
     private val reminderScheduler: WorkoutReminderScheduler
 ) : ViewModel() {
 
-    private val templateId: Long = savedStateHandle.get<String>("templateId")?.toLong()
+    private val templateId: Long = savedStateHandle.get<Long>("templateId")
         ?: error("Template id required")
 
     private val initialState = ScheduleUiState(templateId = templateId)
