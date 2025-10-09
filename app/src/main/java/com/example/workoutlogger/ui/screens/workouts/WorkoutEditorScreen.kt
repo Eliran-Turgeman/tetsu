@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,6 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.workoutlogger.R
 import com.example.workoutlogger.domain.model.WorkoutItemType
+import com.example.workoutlogger.ui.components.ScreenContainer
 import kotlinx.coroutines.launch
 
 @Composable
@@ -136,39 +138,40 @@ private fun WorkoutEditorScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            OutlinedTextField(
-                value = state.workoutName,
-                onValueChange = onNameChanged,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(id = R.string.label_template_name)) }
-            )
-
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = onAddExercise) {
-                    Text(text = stringResource(id = R.string.label_add_exercise))
-                }
-                Button(onClick = onAddSuperset) {
-                    Text(text = stringResource(id = R.string.label_add_superset))
-                }
-            }
-
-            Text(
-                text = stringResource(id = R.string.label_template_items),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
+        ScreenContainer(paddingValues = padding) {
             LazyColumn(
-                modifier = Modifier.weight(1f, fill = false),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(bottom = 120.dp)
             ) {
+                item {
+                    OutlinedTextField(
+                        value = state.workoutName,
+                        onValueChange = onNameChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(id = R.string.label_template_name)) }
+                    )
+                }
+
+                item {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Button(onClick = onAddExercise) {
+                            Text(text = stringResource(id = R.string.label_add_exercise))
+                        }
+                        FilledTonalButton(onClick = onAddSuperset) {
+                            Text(text = stringResource(id = R.string.label_add_superset))
+                        }
+                    }
+                }
+
+                item {
+                    Text(
+                        text = stringResource(id = R.string.label_template_items),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
                 items(state.items, key = { it.localId }) { item ->
                     WorkoutItemEditorCard(
                         item = item,
@@ -178,10 +181,12 @@ private fun WorkoutEditorScreen(
                         onRemove = { onRemoveItem(item.localId) }
                     )
                 }
-            }
 
-            Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(id = R.string.action_save))
+                item {
+                    Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
+                        Text(text = stringResource(id = R.string.action_save))
+                    }
+                }
             }
         }
     }
@@ -196,25 +201,25 @@ private fun WorkoutItemEditorCard(
     onRemove: () -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    IconButton(onClick = onMoveUp) {
-                        Icon(imageVector = Icons.Default.ArrowUpward, contentDescription = null)
-                    }
-                    IconButton(onClick = onMoveDown) {
-                        Icon(imageVector = Icons.Default.ArrowDownward, contentDescription = null)
-                    }
+                IconButton(onClick = onMoveUp) {
+                    Icon(imageVector = Icons.Default.ArrowUpward, contentDescription = null)
+                }
+                IconButton(onClick = onMoveDown) {
+                    Icon(imageVector = Icons.Default.ArrowDownward, contentDescription = null)
                 }
                 IconButton(onClick = onRemove) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.label_remove))
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             if (item.type == WorkoutItemType.SUPERSET_HEADER) {
                 OutlinedTextField(
@@ -234,7 +239,10 @@ private fun WorkoutItemEditorCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     OutlinedTextField(
                         value = item.sets,
                         onValueChange = { value -> onUpdate { it.copy(sets = value.filter { ch -> ch.isDigit() }) } },

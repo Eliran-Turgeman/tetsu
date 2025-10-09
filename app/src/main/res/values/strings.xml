@@ -49,6 +49,14 @@
     <string name="label_select_time">Select time</string>
     <string name="label_select_days">Select days</string>
     <string name="label_heatmap_recent_sessions">Sessions</string>
+    <string name="label_heatmap_hint">Tap a tile to open that day\'s workouts.</string>
+    <string name="label_heatmap_sessions_header">Sessions on this day</string>
+    <string name="label_heatmap_empty">Keep logging workouts to see your streak come to life.</string>
+    <string name="label_heatmap_single_session">1 workout logged.</string>
+    <string name="label_heatmap_sessions_count">%1$d workouts logged.</string>
+    <string name="label_status_active">In progress</string>
+    <string name="label_status_completed">Completed</string>
+    <string name="label_status_cancelled">Cancelled</string>
     <string name="label_settings_notifications">Notifications</string>
     <string name="label_settings_units">Units</string>
     <string name="dialog_delete_template_title">Delete template</string>

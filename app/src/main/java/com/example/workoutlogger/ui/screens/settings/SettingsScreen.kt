@@ -7,6 +7,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -76,7 +78,7 @@ private fun isNotificationGranted(context: android.content.Context): Boolean {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun SettingsScreen(
     state: SettingsUiState,
@@ -120,7 +122,7 @@ private fun SettingsScreen(
                         stringResource(id = R.string.label_permission_not_granted)
                     }
                     Text(text = permissionStatus)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = onRequestPermission, enabled = !state.notificationPermissionGranted) {
                             Text(text = stringResource(id = R.string.label_notification_permission_request))
                         }

@@ -2,10 +2,10 @@ package com.example.workoutlogger.ui.screens.workouts
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,17 +16,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.workoutlogger.R
 import com.example.workoutlogger.domain.model.Workout
+import com.example.workoutlogger.ui.components.ScreenContainer
 
 @Composable
 fun WorkoutListRoute(
@@ -117,7 +122,7 @@ internal fun WorkoutListScreen(
                 }
             },
             dismissButton = {
-                Button(onClick = { confirmDeleteId = null }) {
+                TextButton(onClick = { confirmDeleteId = null }) {
                     Text(text = stringResource(id = R.string.action_cancel))
                 }
             }
@@ -129,7 +134,7 @@ internal fun WorkoutListScreen(
             TopAppBar(
                 title = { Text(text = stringResource(id = R.string.nav_templates)) },
                 actions = {
-                    Button(onClick = onCreateWorkout) {
+                    TextButton(onClick = onCreateWorkout) {
                         Text(text = stringResource(id = R.string.action_add_template))
                     }
                 }
@@ -137,45 +142,46 @@ internal fun WorkoutListScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            if (workouts.isEmpty()) {
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = stringResource(id = R.string.label_empty_templates),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Button(onClick = onCreateWorkout) {
-                                Text(text = stringResource(id = R.string.action_add_template))
+        ScreenContainer(paddingValues = padding) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(bottom = 40.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (workouts.isEmpty()) {
+                    item {
+                        Card(modifier = Modifier.fillMaxWidth()) {
+                            Column(
+                                modifier = Modifier.padding(20.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.label_empty_templates),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Button(onClick = onCreateWorkout) {
+                                    Text(text = stringResource(id = R.string.action_add_template))
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            items(workouts, key = { it.id ?: it.hashCode().toLong() }) { workout ->
-                WorkoutListItem(
-                    workout = workout,
-                    onStart = { workout.id?.let(onStartWorkout) },
-                    onEdit = { workout.id?.let(onEditWorkout) },
-                    onSchedule = { workout.id?.let(onScheduleWorkout) },
-                    onDelete = { workout.id?.let { confirmDeleteId = it } }
-                )
+                items(workouts, key = { it.id ?: it.hashCode().toLong() }) { workout ->
+                    WorkoutListItem(
+                        workout = workout,
+                        onStart = { workout.id?.let(onStartWorkout) },
+                        onEdit = { workout.id?.let(onEditWorkout) },
+                        onSchedule = { workout.id?.let(onScheduleWorkout) },
+                        onDelete = { workout.id?.let { confirmDeleteId = it } }
+                    )
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun WorkoutListItem(
     workout: Workout,
@@ -187,29 +193,42 @@ private fun WorkoutListItem(
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             Text(
                 text = workout.name,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 Button(onClick = onStart) {
                     Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = stringResource(id = R.string.action_start_workout))
                 }
-                Button(onClick = onEdit) {
+                FilledTonalButton(onClick = onEdit) {
                     Icon(imageVector = Icons.Default.Edit, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = stringResource(id = R.string.nav_template_editor))
                 }
-                IconButton(onClick = onSchedule) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = null)
+                OutlinedButton(onClick = onSchedule) {
+                    Icon(imageVector = Icons.Default.Schedule, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = stringResource(id = R.string.action_open_schedule))
                 }
-                IconButton(onClick = onDelete) {
+                TextButton(
+                    onClick = onDelete,
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.label_remove))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = stringResource(id = R.string.action_delete))
                 }
             }
         }
