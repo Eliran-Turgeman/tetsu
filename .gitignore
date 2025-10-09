@@ -1,0 +1,9 @@
+.gradle/
+/.idea/
+/build/
+*/build/
+/local.properties
+/.kotlin
+.DS_Store
+*.hprof
+prompt.md
