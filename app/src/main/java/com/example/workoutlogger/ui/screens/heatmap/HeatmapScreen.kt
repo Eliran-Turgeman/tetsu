@@ -1,5 +1,6 @@
 package com.example.workoutlogger.ui.screens.heatmap
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -22,6 +24,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -70,7 +73,13 @@ private fun HeatmapScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(text = stringResource(id = R.string.nav_heatmap)) })
+            TopAppBar(
+                title = { Text(text = stringResource(id = R.string.nav_heatmap)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
+            )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
@@ -84,7 +93,8 @@ private fun HeatmapScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(
                             text = stringResource(id = R.string.label_heatmap_month_header),
-                            style = MaterialTheme.typography.titleLarge
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = stringResource(id = R.string.label_heatmap_hint),
@@ -230,7 +240,8 @@ private fun HeatmapSelectionSummary(state: HeatmapUiState) {
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodySmall,
-                color = contentColor
+                color = contentColor,
+                fontWeight = FontWeight.Medium
             )
         }
     }
@@ -246,10 +257,10 @@ private fun HeatmapCell(
     val sessionCount = day.sessions.size
     val baseColor = when {
         sessionCount >= 3 -> MaterialTheme.colorScheme.primary
-        sessionCount == 2 -> MaterialTheme.colorScheme.primaryContainer
-        sessionCount == 1 -> MaterialTheme.colorScheme.secondaryContainer
-        day.hasWorkout -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        sessionCount == 2 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
+        sessionCount == 1 -> MaterialTheme.colorScheme.primaryContainer
+        day.hasWorkout -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
     }
     val isSelected = selectedDate == day.date
     val borderColor = if (isSelected) {
@@ -290,7 +301,9 @@ private fun SessionRow(session: WorkoutSession, onOpenSession: (Long) -> Unit) {
     val end = (session.endedAt ?: session.startedAt).toLocalDateTime(timeZone)
     androidx.compose.material3.Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = { session.id?.let(onOpenSession) }
+        onClick = { session.id?.let(onOpenSession) },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.18f))
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),

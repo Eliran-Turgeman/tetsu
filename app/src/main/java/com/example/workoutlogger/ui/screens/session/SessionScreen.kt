@@ -2,6 +2,7 @@
 
 package com.example.workoutlogger.ui.screens.session
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -172,13 +175,23 @@ private fun SessionScreen(
                     )
                 },
                 actions = {
-                    TextButton(onClick = onFinish) {
+                    TextButton(
+                        onClick = onFinish,
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                    ) {
                         Text(text = stringResource(id = R.string.action_finish_session))
                     }
-                    TextButton(onClick = onCancel) {
+                    TextButton(
+                        onClick = onCancel,
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
+                    ) {
                         Text(text = stringResource(id = R.string.action_cancel_session))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -262,7 +275,12 @@ private fun SessionScreen(
         onMoveUp: () -> Unit,
         onMoveDown: () -> Unit
     ) {
-        Surface(shape = RoundedCornerShape(12.dp), tonalElevation = 2.dp) {
+        Surface(
+            shape = RoundedCornerShape(18.dp),
+            tonalElevation = 0.dp,
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.16f))
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
@@ -332,7 +350,14 @@ private fun SessionScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                Button(onClick = onAddSet, modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = onAddSet,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
                     Text(text = stringResource(id = R.string.label_add_set))
                 }
             }
@@ -349,7 +374,7 @@ private fun SessionScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
                 .padding(12.dp)
         ) {
             Text(
@@ -394,7 +419,10 @@ private fun SessionScreen(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box {
-                    TextButton(onClick = { dropdownExpanded = true }) {
+                    TextButton(
+                        onClick = { dropdownExpanded = true },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                    ) {
                         Text(text = unit.name)
                     }
                     DropdownMenu(
@@ -456,12 +484,18 @@ private fun SessionScreen(
             title = { Text(text = title) },
             text = { Text(text = message) },
             confirmButton = {
-                TextButton(onClick = onConfirm) {
+                TextButton(
+                    onClick = onConfirm,
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
                     Text(text = confirmText)
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismiss) {
+                TextButton(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                ) {
                     Text(text = stringResource(id = R.string.action_cancel))
                 }
             }
@@ -517,7 +551,10 @@ private fun SessionScreen(
                         )
                     }
                     Box {
-                        TextButton(onClick = { dropdownExpanded = true }) {
+                        TextButton(
+                            onClick = { dropdownExpanded = true },
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                        ) {
                             Text(text = unit.name)
                         }
                         DropdownMenu(
@@ -534,20 +571,25 @@ private fun SessionScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    val setsInt = sets.toIntOrNull() ?: 0
-                    val minInt = repsMin.toIntOrNull()
-                    val maxInt = repsMax.toIntOrNull()
-                    onAdd(name, superset.ifBlank { null }, setsInt, minInt, maxInt, unit)
-                }) {
+                TextButton(
+                    onClick = {
+                        val setsInt = sets.toIntOrNull() ?: 0
+                        val minInt = repsMin.toIntOrNull()
+                        val maxInt = repsMax.toIntOrNull()
+                        onAdd(name, superset.ifBlank { null }, setsInt, minInt, maxInt, unit)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
                     Text(text = stringResource(id = R.string.action_add))
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismiss) {
+                TextButton(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                ) {
                     Text(text = stringResource(id = R.string.action_cancel))
                 }
             }
         )
     }
-

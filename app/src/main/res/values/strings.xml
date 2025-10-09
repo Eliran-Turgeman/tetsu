@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Workout Logger</string>
+    <string name="app_name">tetsu</string>
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_templates">Templates</string>
     <string name="nav_heatmap">Heatmap</string>

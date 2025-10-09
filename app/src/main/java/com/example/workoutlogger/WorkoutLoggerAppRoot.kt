@@ -53,9 +53,9 @@ fun WorkoutLoggerAppRoot(startWorkoutId: Long? = null) {
 
         val gradient = Brush.verticalGradient(
             colors = listOf(
-                playful_gradient_start.copy(alpha = 0.65f),
+                playful_gradient_start,
                 MaterialTheme.colorScheme.background,
-                playful_gradient_end.copy(alpha = 0.6f)
+                playful_gradient_end
             )
         )
 
@@ -69,7 +69,7 @@ fun WorkoutLoggerAppRoot(startWorkoutId: Long? = null) {
                 contentColor = MaterialTheme.colorScheme.onBackground,
                 bottomBar = {
                     NavigationBar(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                        containerColor = MaterialTheme.colorScheme.surface,
                         tonalElevation = 0.dp
                     ) {
                         AppDestination.bottomDestinations.forEach { destination ->

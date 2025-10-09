@@ -2,6 +2,7 @@
 
 package com.example.workoutlogger.ui.screens.workouts
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -20,7 +21,9 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -33,6 +36,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -133,7 +137,11 @@ private fun WorkoutEditorScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.nav_template_editor)) }
+                title = { Text(text = stringResource(id = R.string.nav_template_editor)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -155,10 +163,22 @@ private fun WorkoutEditorScreen(
 
                 item {
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Button(onClick = onAddExercise) {
+                        Button(
+                            onClick = onAddExercise,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
                             Text(text = stringResource(id = R.string.label_add_exercise))
                         }
-                        FilledTonalButton(onClick = onAddSuperset) {
+                        FilledTonalButton(
+                            onClick = onAddSuperset,
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        ) {
                             Text(text = stringResource(id = R.string.label_add_superset))
                         }
                     }
@@ -183,7 +203,14 @@ private fun WorkoutEditorScreen(
                 }
 
                 item {
-                    Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = onSave,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
                         Text(text = stringResource(id = R.string.action_save))
                     }
                 }
@@ -200,7 +227,11 @@ private fun WorkoutItemEditorCard(
     onMoveDown: () -> Unit,
     onRemove: () -> Unit
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+    ) {
         Column(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -292,12 +323,18 @@ private fun SupersetDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onAdd(value.trim()) }) {
+            TextButton(
+                onClick = { onAdd(value.trim()) },
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+            ) {
                 Text(text = stringResource(id = R.string.action_add))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+            ) {
                 Text(text = stringResource(id = R.string.action_cancel))
             }
         }

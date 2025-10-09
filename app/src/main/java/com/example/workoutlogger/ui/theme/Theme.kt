@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import com.example.workoutlogger.ui.theme.WorkoutShapes
 import com.example.workoutlogger.ui.theme.WorkoutTypography
 import com.example.workoutlogger.ui.theme.md_theme_dark_background
+import com.example.workoutlogger.ui.theme.md_theme_dark_inverseOnSurface
+import com.example.workoutlogger.ui.theme.md_theme_dark_inverseSurface
 import com.example.workoutlogger.ui.theme.md_theme_dark_onBackground
 import com.example.workoutlogger.ui.theme.md_theme_dark_onPrimary
 import com.example.workoutlogger.ui.theme.md_theme_dark_onPrimaryContainer
@@ -26,9 +28,9 @@ import com.example.workoutlogger.ui.theme.md_theme_dark_surface
 import com.example.workoutlogger.ui.theme.md_theme_dark_surfaceVariant
 import com.example.workoutlogger.ui.theme.md_theme_dark_tertiary
 import com.example.workoutlogger.ui.theme.md_theme_dark_tertiaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_dark_inverseOnSurface
-import com.example.workoutlogger.ui.theme.md_theme_dark_inverseSurface
 import com.example.workoutlogger.ui.theme.md_theme_light_background
+import com.example.workoutlogger.ui.theme.md_theme_light_inverseOnSurface
+import com.example.workoutlogger.ui.theme.md_theme_light_inverseSurface
 import com.example.workoutlogger.ui.theme.md_theme_light_onBackground
 import com.example.workoutlogger.ui.theme.md_theme_light_onPrimary
 import com.example.workoutlogger.ui.theme.md_theme_light_onPrimaryContainer
@@ -47,8 +49,6 @@ import com.example.workoutlogger.ui.theme.md_theme_light_surface
 import com.example.workoutlogger.ui.theme.md_theme_light_surfaceVariant
 import com.example.workoutlogger.ui.theme.md_theme_light_tertiary
 import com.example.workoutlogger.ui.theme.md_theme_light_tertiaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_light_inverseOnSurface
-import com.example.workoutlogger.ui.theme.md_theme_light_inverseSurface
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
