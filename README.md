@@ -1,6 +1,6 @@
 # Tetsu
 
-![Tetsu logo](app/src/main/res/drawable/ic_launcher_foreground.png)
+<img src="app/src/main/res/drawable/ic_launcher_foreground.png" alt="Tetsu logo" width="200"/>
 
 ![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white) ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?logo=kotlin&logoColor=white) ![Gradle](https://img.shields.io/badge/Gradle-02303A?logo=gradle&logoColor=white)
 
