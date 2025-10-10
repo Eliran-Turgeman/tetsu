@@ -2,57 +2,57 @@ package com.example.workoutlogger.ui.screens.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.workoutlogger.ui.components.ScreenContainer
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.workoutlogger.R
 import com.example.workoutlogger.domain.model.Workout
-import com.example.workoutlogger.domain.model.WorkoutStatus
+import com.example.workoutlogger.domain.model.WorkoutItemType
+import com.example.workoutlogger.domain.model.WorkoutSession
+import com.example.workoutlogger.ui.components.PrimaryButton
+import com.example.workoutlogger.ui.components.SectionHeader
+import com.example.workoutlogger.ui.components.TemplateCard
+import com.example.workoutlogger.ui.components.TemplateUi
+import com.example.workoutlogger.ui.components.TonalIconButton
 
 @Composable
 fun DashboardRoute(
     onCreateWorkout: () -> Unit,
     onEditWorkout: (Long) -> Unit,
     onOpenSession: (Long) -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onViewAllTemplates: () -> Unit,
+    onScheduleWorkout: (Long) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val error by viewModel.error.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(error) {
         error?.let { message ->
@@ -66,12 +66,15 @@ fun DashboardRoute(
         snackbarHostState = snackbarHostState,
         onCreateWorkout = onCreateWorkout,
         onEditWorkout = onEditWorkout,
+        onScheduleWorkout = onScheduleWorkout,
         onStartWorkout = { workoutId ->
             viewModel.startSession(workoutId) { sessionId ->
                 sessionId?.let(onOpenSession)
             }
         },
-        onResumeSession = onOpenSession
+        onResumeSession = onOpenSession,
+        onNavigateToSettings = onNavigateToSettings,
+        onViewAllTemplates = onViewAllTemplates
     )
 }
 
@@ -82,127 +85,96 @@ private fun DashboardScreen(
     snackbarHostState: SnackbarHostState,
     onCreateWorkout: () -> Unit,
     onEditWorkout: (Long) -> Unit,
+    onScheduleWorkout: (Long) -> Unit,
     onStartWorkout: (Long) -> Unit,
-    onResumeSession: (Long) -> Unit
+    onResumeSession: (Long) -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onViewAllTemplates: () -> Unit
 ) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(id = R.string.nav_dashboard)) },
-                colors = TopAppBarDefaults.topAppBarColors(
+            LargeTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.nav_dashboard),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
+                actions = {
+                    TonalIconButton(
+                        icon = Icons.Rounded.Settings,
+                        contentDescription = stringResource(id = R.string.nav_settings),
+                        onClick = onNavigateToSettings
+                    )
+                },
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
                 )
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { padding ->
-        ScreenContainer(paddingValues = padding) {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 40.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                item {
-                    Text(
-                        text = stringResource(id = R.string.label_active_session),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.spacedBy(32.dp),
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 32.dp)
+        ) {
+            item("active_session") {
+                ActiveSessionSection(
+                    session = state.activeSession,
+                    onResume = onResumeSession,
+                    onStartWorkoutCta = onViewAllTemplates
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                if (state.activeSession != null) {
-                    Card(
-                        onClick = { state.activeSession.id?.let(onResumeSession) },
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                    ) {
-                        ListItem(
-                            headlineContent = {
-                                Text(
-                                    text = state.activeSession.workoutNameSnapshot,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                            },
-                            supportingContent = {
-                                val statusLabel = when (state.activeSession.status) {
-                                    WorkoutStatus.ACTIVE -> stringResource(id = R.string.label_status_active)
-                                    WorkoutStatus.COMPLETED -> stringResource(id = R.string.label_status_completed)
-                                    WorkoutStatus.CANCELLED -> stringResource(id = R.string.label_status_cancelled)
-                                }
-                                Text(
-                                    text = statusLabel,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        )
-                    }
-                } else {
-                    Text(
-                        text = stringResource(id = R.string.label_no_previous_data),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
 
-            item {
-                Text(
-                    text = stringResource(id = R.string.nav_templates),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+            item("templates_preview") {
+                TemplatesPreviewSection(
+                    workouts = state.workouts,
+                    onViewAll = onViewAllTemplates,
+                    onCreateWorkout = onCreateWorkout,
+                    onStartWorkout = onStartWorkout,
+                    onEditWorkout = onEditWorkout,
+                    onScheduleWorkout = onScheduleWorkout
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                if (state.workouts.isEmpty()) {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.label_empty_templates),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(
-                                onClick = onCreateWorkout,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                            ) {
-                                Text(text = stringResource(id = R.string.action_add_template))
-                            }
-                        }
-                    }
-                }
-            }
-
-            items(state.workouts, key = { it.id ?: it.hashCode().toLong() }) { workout ->
-                WorkoutCard(
-                    workout = workout,
-                    onStart = { workout.id?.let(onStartWorkout) },
-                    onEdit = { workout.id?.let(onEditWorkout) }
-                )
-            }
             }
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun WorkoutCard(
-    workout: Workout,
-    onStart: () -> Unit,
-    onEdit: () -> Unit
+private fun ActiveSessionSection(
+    session: WorkoutSession?,
+    onResume: (Long) -> Unit,
+    onStartWorkoutCta: () -> Unit
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SectionHeader(title = stringResource(id = R.string.label_active_session))
+        if (session != null && session.id != null) {
+            ActiveSessionCard(session = session, onResume = onResume)
+        } else {
+            EmptyActiveSessionCard(onStartCta = onStartWorkoutCta)
+        }
+    }
+}
+
+@Composable
+private fun ActiveSessionCard(session: WorkoutSession, onResume: (Long) -> Unit) {
+    val sessionId = session.id ?: return
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 6.dp
     ) {
         Column(
             modifier = Modifier
@@ -211,34 +183,124 @@ private fun WorkoutCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = workout.name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                text = session.workoutNameSnapshot,
+                style = MaterialTheme.typography.titleLarge
             )
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = onStart,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Text(text = stringResource(id = R.string.action_start_workout))
-                }
-                FilledTonalButton(
-                    onClick = onEdit,
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                ) {
-                    Text(text = stringResource(id = R.string.nav_template_editor))
-                }
+            Text(
+                text = stringResource(id = R.string.label_status_active),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            PrimaryButton(
+                text = stringResource(id = R.string.action_resume_session),
+                icon = Icons.Rounded.PlayArrow,
+                onClick = { onResume(sessionId) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyActiveSessionCard(onStartCta: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 2.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.label_no_active_session),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            PrimaryButton(
+                text = stringResource(id = R.string.label_start_workout_cta),
+                onClick = onStartCta
+            )
+        }
+    }
+}
+
+@Composable
+private fun TemplatesPreviewSection(
+    workouts: List<Workout>,
+    onViewAll: () -> Unit,
+    onCreateWorkout: () -> Unit,
+    onStartWorkout: (Long) -> Unit,
+    onEditWorkout: (Long) -> Unit,
+    onScheduleWorkout: (Long) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SectionHeader(
+            title = stringResource(id = R.string.nav_templates),
+            actionText = stringResource(id = R.string.action_view_all_templates),
+            onActionClick = onViewAll
+        )
+
+        if (workouts.isEmpty()) {
+            EmptyTemplatesCard(onCreateWorkout = onCreateWorkout)
+        } else {
+            workouts.take(3).forEach { workout ->
+                val id = workout.id ?: return@forEach
+                TemplateCard(
+                    template = workout.asTemplateUi(),
+                    onStart = { onStartWorkout(id) },
+                    onEdit = { onEditWorkout(id) },
+                    onSchedule = { onScheduleWorkout(id) }
+                )
             }
         }
     }
+}
+
+@Composable
+private fun EmptyTemplatesCard(onCreateWorkout: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 2.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.label_empty_templates),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            PrimaryButton(
+                text = stringResource(id = R.string.action_add_template),
+                onClick = onCreateWorkout
+            )
+        }
+    }
+}
+
+@Composable
+private fun Workout.asTemplateUi(): TemplateUi {
+    val exerciseCount = items.count { it.type == WorkoutItemType.EXERCISE }
+    val supersetCount = items.count { it.type == WorkoutItemType.SUPERSET_HEADER }
+    val metaParts = buildList {
+        add(pluralStringResource(id = R.plurals.label_meta_exercises, count = exerciseCount, exerciseCount))
+        if (supersetCount > 0) {
+            add(pluralStringResource(id = R.plurals.label_meta_supersets, count = supersetCount, supersetCount))
+        }
+    }
+    return TemplateUi(
+        id = id,
+        name = name,
+        meta = metaParts.joinToString(" • ")
+    )
 }

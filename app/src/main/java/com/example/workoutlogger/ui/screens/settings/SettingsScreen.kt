@@ -1,40 +1,35 @@
 package com.example.workoutlogger.ui.screens.settings
 
 import android.Manifest
-import android.content.Context
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,6 +37,10 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.workoutlogger.R
 import com.example.workoutlogger.domain.model.WeightUnit
+import com.example.workoutlogger.ui.components.PrimaryButton
+import com.example.workoutlogger.ui.components.SecondaryButton
+import com.example.workoutlogger.ui.components.SectionHeader
+import com.example.workoutlogger.ui.components.SegmentedControl
 
 @Composable
 fun SettingsRoute(
@@ -83,7 +82,7 @@ private fun isNotificationGranted(context: android.content.Context): Boolean {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SettingsScreen(
     state: SettingsUiState,
@@ -92,83 +91,119 @@ private fun SettingsScreen(
     onRequestPermission: () -> Unit,
     onOpenNotificationSettings: () -> Unit
 ) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val units = remember { WeightUnit.values() }
+
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(id = R.string.nav_settings)) },
-                colors = TopAppBarDefaults.topAppBarColors(
+            LargeTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.nav_settings),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
                 )
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize()
+                .padding(padding),
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-            ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(text = stringResource(id = R.string.label_settings_units), style = MaterialTheme.typography.titleMedium)
-                    WeightUnit.values().forEach { unit ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(text = unit.name)
-                            RadioButton(selected = state.defaultUnit == unit, onClick = { onSelectUnit(unit) })
-                        }
+            item("units") {
+                SettingsCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        SectionHeader(title = stringResource(id = R.string.label_settings_units))
+                        SegmentedControl(
+                            options = units.map { it.name },
+                            selectedIndex = units.indexOf(state.defaultUnit),
+                            onSelect = { index -> onSelectUnit(units[index]) }
+                        )
                     }
                 }
             }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-            ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(text = stringResource(id = R.string.label_settings_notifications), style = MaterialTheme.typography.titleMedium)
-                    val permissionStatus = if (state.notificationPermissionGranted) {
-                        stringResource(id = R.string.label_permission_granted)
-                    } else {
-                        stringResource(id = R.string.label_permission_not_granted)
-                    }
-                    Text(
-                        text = permissionStatus,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(
-                            onClick = onRequestPermission,
-                            enabled = !state.notificationPermissionGranted,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            item("notifications") {
+                SettingsCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        SectionHeader(title = stringResource(id = R.string.label_settings_notifications))
+                        NotificationStatusRow(granted = state.notificationPermissionGranted)
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            PrimaryButton(
+                                text = stringResource(id = R.string.label_notification_permission_request),
+                                onClick = onRequestPermission,
+                                enabled = !state.notificationPermissionGranted
                             )
-                        ) {
-                            Text(text = stringResource(id = R.string.label_notification_permission_request))
-                        }
-                        OutlinedButton(
-                            onClick = onOpenNotificationSettings,
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                        ) {
-                            Text(text = stringResource(id = R.string.content_description_open_settings))
+                            SecondaryButton(
+                                text = stringResource(id = R.string.content_description_open_settings),
+                                onClick = onOpenNotificationSettings
+                            )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 2.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun NotificationStatusRow(granted: Boolean) {
+    val label = if (granted) {
+        stringResource(id = R.string.label_permission_granted)
+    } else {
+        stringResource(id = R.string.label_permission_not_granted)
+    }
+    val badgeColor = if (granted) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+    } else {
+        MaterialTheme.colorScheme.error.copy(alpha = 0.16f)
+    }
+    val textColor = if (granted) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.error
+    }
+
+    Surface(
+        color = badgeColor,
+        contentColor = textColor,
+        shape = MaterialTheme.shapes.small,
+        tonalElevation = 0.dp
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.labelLarge
+        )
     }
 }

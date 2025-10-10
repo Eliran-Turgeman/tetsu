@@ -77,6 +77,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.foundation:foundation-layout")
     implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.34.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")

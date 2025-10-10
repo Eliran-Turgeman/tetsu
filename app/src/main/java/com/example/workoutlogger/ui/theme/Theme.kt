@@ -1,112 +1,95 @@
-package com.example.workoutlogger
+package com.example.workoutlogger.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import com.example.workoutlogger.ui.theme.WorkoutShapes
-import com.example.workoutlogger.ui.theme.WorkoutTypography
-import com.example.workoutlogger.ui.theme.md_theme_dark_background
-import com.example.workoutlogger.ui.theme.md_theme_dark_inverseOnSurface
-import com.example.workoutlogger.ui.theme.md_theme_dark_inverseSurface
-import com.example.workoutlogger.ui.theme.md_theme_dark_onBackground
-import com.example.workoutlogger.ui.theme.md_theme_dark_onPrimary
-import com.example.workoutlogger.ui.theme.md_theme_dark_onPrimaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_dark_onSecondary
-import com.example.workoutlogger.ui.theme.md_theme_dark_onSecondaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_dark_onSurface
-import com.example.workoutlogger.ui.theme.md_theme_dark_onSurfaceVariant
-import com.example.workoutlogger.ui.theme.md_theme_dark_onTertiary
-import com.example.workoutlogger.ui.theme.md_theme_dark_onTertiaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_dark_outline
-import com.example.workoutlogger.ui.theme.md_theme_dark_primary
-import com.example.workoutlogger.ui.theme.md_theme_dark_primaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_dark_secondary
-import com.example.workoutlogger.ui.theme.md_theme_dark_secondaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_dark_surface
-import com.example.workoutlogger.ui.theme.md_theme_dark_surfaceVariant
-import com.example.workoutlogger.ui.theme.md_theme_dark_tertiary
-import com.example.workoutlogger.ui.theme.md_theme_dark_tertiaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_light_background
-import com.example.workoutlogger.ui.theme.md_theme_light_inverseOnSurface
-import com.example.workoutlogger.ui.theme.md_theme_light_inverseSurface
-import com.example.workoutlogger.ui.theme.md_theme_light_onBackground
-import com.example.workoutlogger.ui.theme.md_theme_light_onPrimary
-import com.example.workoutlogger.ui.theme.md_theme_light_onPrimaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_light_onSecondary
-import com.example.workoutlogger.ui.theme.md_theme_light_onSecondaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_light_onSurface
-import com.example.workoutlogger.ui.theme.md_theme_light_onSurfaceVariant
-import com.example.workoutlogger.ui.theme.md_theme_light_onTertiary
-import com.example.workoutlogger.ui.theme.md_theme_light_onTertiaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_light_outline
-import com.example.workoutlogger.ui.theme.md_theme_light_primary
-import com.example.workoutlogger.ui.theme.md_theme_light_primaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_light_secondary
-import com.example.workoutlogger.ui.theme.md_theme_light_secondaryContainer
-import com.example.workoutlogger.ui.theme.md_theme_light_surface
-import com.example.workoutlogger.ui.theme.md_theme_light_surfaceVariant
-import com.example.workoutlogger.ui.theme.md_theme_light_tertiary
-import com.example.workoutlogger.ui.theme.md_theme_light_tertiaryContainer
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 
-private val LightColors = lightColorScheme(
-    primary = md_theme_light_primary,
-    onPrimary = md_theme_light_onPrimary,
-    primaryContainer = md_theme_light_primaryContainer,
-    onPrimaryContainer = md_theme_light_onPrimaryContainer,
-    secondary = md_theme_light_secondary,
-    onSecondary = md_theme_light_onSecondary,
-    secondaryContainer = md_theme_light_secondaryContainer,
-    onSecondaryContainer = md_theme_light_onSecondaryContainer,
-    tertiary = md_theme_light_tertiary,
-    onTertiary = md_theme_light_onTertiary,
-    tertiaryContainer = md_theme_light_tertiaryContainer,
-    onTertiaryContainer = md_theme_light_onTertiaryContainer,
-    background = md_theme_light_background,
-    onBackground = md_theme_light_onBackground,
-    surface = md_theme_light_surface,
-    onSurface = md_theme_light_onSurface,
-    surfaceVariant = md_theme_light_surfaceVariant,
-    onSurfaceVariant = md_theme_light_onSurfaceVariant,
-    outline = md_theme_light_outline,
-    inverseSurface = md_theme_light_inverseSurface,
-    inverseOnSurface = md_theme_light_inverseOnSurface
+private val DarkColorScheme = darkColorScheme(
+    primary = TetsuGreen,
+    onPrimary = Color(0xFF082812),
+    primaryContainer = TetsuGreenContainer,
+    onPrimaryContainer = TetsuGreenOnContainer,
+    secondary = OnSurfaceDim,
+    onSecondary = Surface0,
+    secondaryContainer = Surface3,
+    onSecondaryContainer = OnSurface,
+    tertiary = Color(0xFF4AC2FF),
+    onTertiary = Surface0,
+    tertiaryContainer = Color(0xFF102F42),
+    onTertiaryContainer = Color(0xFFCCE9FF),
+    background = Surface0,
+    onBackground = OnSurface,
+    surface = Surface1,
+    surfaceVariant = Surface2,
+    onSurface = OnSurface,
+    onSurfaceVariant = OnSurfaceDim,
+    outline = Outline,
+    outlineVariant = Outline.copy(alpha = 0.6f),
+    inverseSurface = OnSurface,
+    inverseOnSurface = Surface1,
+    surfaceTint = TetsuGreen,
+    scrim = Shadow.copy(alpha = 0.7f),
+    error = Error,
+    onError = OnError,
+    errorContainer = ErrorContainer,
+    onErrorContainer = OnErrorContainer
 )
 
-private val DarkColors = darkColorScheme(
-    primary = md_theme_dark_primary,
-    onPrimary = md_theme_dark_onPrimary,
-    primaryContainer = md_theme_dark_primaryContainer,
-    onPrimaryContainer = md_theme_dark_onPrimaryContainer,
-    secondary = md_theme_dark_secondary,
-    onSecondary = md_theme_dark_onSecondary,
-    secondaryContainer = md_theme_dark_secondaryContainer,
-    onSecondaryContainer = md_theme_dark_onSecondaryContainer,
-    tertiary = md_theme_dark_tertiary,
-    onTertiary = md_theme_dark_onTertiary,
-    tertiaryContainer = md_theme_dark_tertiaryContainer,
-    onTertiaryContainer = md_theme_dark_onTertiaryContainer,
-    background = md_theme_dark_background,
-    onBackground = md_theme_dark_onBackground,
-    surface = md_theme_dark_surface,
-    onSurface = md_theme_dark_onSurface,
-    surfaceVariant = md_theme_dark_surfaceVariant,
-    onSurfaceVariant = md_theme_dark_onSurfaceVariant,
-    outline = md_theme_dark_outline,
-    inverseSurface = md_theme_dark_inverseSurface,
-    inverseOnSurface = md_theme_dark_inverseOnSurface
+private val LightColorScheme = lightColorScheme(
+    primary = LightPrimary,
+    onPrimary = Color.White,
+    primaryContainer = LightPrimaryContainer,
+    onPrimaryContainer = LightOnPrimaryContainer,
+    secondary = Color(0xFF1F2937),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFE3E9F2),
+    onSecondaryContainer = Color(0xFF111A2A),
+    tertiary = Color(0xFF2264C7),
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFD9E5FF),
+    onTertiaryContainer = Color(0xFF041C38),
+    background = LightBackground,
+    onBackground = LightOnSurface,
+    surface = LightSurface,
+    surfaceVariant = LightSurfaceVariant,
+    onSurface = LightOnSurface,
+    onSurfaceVariant = LightOnSurfaceVariant,
+    outline = LightOutline,
+    outlineVariant = LightOutline.copy(alpha = 0.6f),
+    inverseSurface = Color(0xFF1D2530),
+    inverseOnSurface = Color(0xFFF0F3F8),
+    surfaceTint = LightPrimary,
+    scrim = Shadow.copy(alpha = 0.5f),
+    error = Error,
+    onError = Color.White,
+    errorContainer = ErrorContainer,
+    onErrorContainer = OnErrorContainer
 )
 
 @Composable
 fun WorkoutLoggerTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (useDarkTheme) DarkColors else LightColors
+    val context = LocalContext.current
+    val colors = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        useDarkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colors,
         typography = WorkoutTypography,
         shapes = WorkoutShapes,
         content = content

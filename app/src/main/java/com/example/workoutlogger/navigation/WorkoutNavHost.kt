@@ -5,6 +5,7 @@ import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -25,6 +26,16 @@ fun WorkoutNavHost(
     pendingStartWorkoutId: Long? = null,
     onConsumedPendingStart: () -> Unit = {}
 ) {
+    fun NavHostController.navigateBottom(route: String) {
+        navigate(route) {
+            popUpTo(graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = AppDestination.Dashboard.route,
@@ -40,6 +51,15 @@ fun WorkoutNavHost(
                 },
                 onOpenSession = { sessionId ->
                     navController.navigate(AppDestination.session(sessionId))
+                },
+                onNavigateToSettings = {
+                    navController.navigateBottom(AppDestination.Settings.route)
+                },
+                onViewAllTemplates = {
+                    navController.navigateBottom(AppDestination.Templates.route)
+                },
+                onScheduleWorkout = { workoutId ->
+                    navController.navigate(AppDestination.schedule(workoutId))
                 }
             )
         }
@@ -67,6 +87,9 @@ fun WorkoutNavHost(
             HeatmapRoute(
                 onOpenSession = { sessionId ->
                     navController.navigate(AppDestination.session(sessionId))
+                },
+                onStartWorkout = {
+                    navController.navigateBottom(AppDestination.Templates.route)
                 }
             )
         }

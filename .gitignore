@@ -6,4 +6,4 @@
 /.kotlin
 .DS_Store
 *.hprof
-prompt.md
+*prompt.md

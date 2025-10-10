@@ -9,6 +9,7 @@
     <string name="nav_schedule">Schedule</string>
     <string name="action_add_template">Add Template</string>
     <string name="action_start_workout">Start Workout</string>
+    <string name="action_resume_session">Resume Session</string>
     <string name="action_finish_session">Finish Session</string>
     <string name="action_cancel_session">Cancel Session</string>
     <string name="action_add">Add</string>
@@ -16,6 +17,8 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
     <string name="action_open_schedule">Schedule</string>
+    <string name="action_view_all_templates">View all templates</string>
+    <string name="action_edit_template">Edit template</string>
     <string name="label_previous_performance">Previous</string>
     <string name="label_no_previous_data">No previous data</string>
     <string name="label_sets">Sets</string>
@@ -41,19 +44,24 @@
     <string name="label_template_name">Template name</string>
     <string name="label_template_items">Template exercises</string>
     <string name="label_empty_templates">No templates yet</string>
+    <string name="label_template_library">Template library</string>
     <string name="label_heatmap_accessibility_on">Workout completed</string>
     <string name="label_heatmap_accessibility_off">No workout</string>
     <string name="label_active_session">Active Session</string>
+    <string name="label_no_active_session">No active session yet. Start a workout to get moving.</string>
+    <string name="label_start_workout_cta">Start a workout</string>
     <string name="label_last_completed">Last completed session</string>
     <string name="label_schedule_header">Template Schedule</string>
     <string name="label_select_time">Select time</string>
     <string name="label_select_days">Select days</string>
     <string name="label_heatmap_recent_sessions">Sessions</string>
+    <string name="action_view_logs">View logs</string>
     <string name="label_heatmap_hint">Tap a tile to open that day\'s workouts.</string>
     <string name="label_heatmap_sessions_header">Sessions on this day</string>
     <string name="label_heatmap_empty">Keep logging workouts to see your streak come to life.</string>
     <string name="label_heatmap_single_session">1 workout logged.</string>
     <string name="label_heatmap_sessions_count">%1$d workouts logged.</string>
+    <string name="label_total_sets_logged">Total sets: %1$d</string>
     <string name="label_status_active">In progress</string>
     <string name="label_status_completed">Completed</string>
     <string name="label_status_cancelled">Cancelled</string>
@@ -96,4 +104,13 @@
     <string name="label_min_reps">Min reps</string>
     <string name="label_max_reps">Max reps</string>
     <string name="label_note">Note</string>
+
+    <plurals name="label_meta_exercises">
+        <item quantity="one">%d exercise</item>
+        <item quantity="other">%d exercises</item>
+    </plurals>
+    <plurals name="label_meta_supersets">
+        <item quantity="one">%d superset</item>
+        <item quantity="other">%d supersets</item>
+    </plurals>
 </resources>
