@@ -78,4 +78,8 @@ class WorkoutRepositoryImpl @Inject constructor(
     override suspend fun deleteScheduleForWorkout(workoutId: Long) {
         scheduleDao.deleteByWorkoutId(workoutId)
     }
+
+    override suspend fun getDistinctExerciseNames(): List<String> {
+        return workoutDao.getDistinctExerciseNames()
+    }
 }

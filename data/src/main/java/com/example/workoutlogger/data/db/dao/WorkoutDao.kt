@@ -40,4 +40,11 @@ interface WorkoutDao {
 
     @Query("SELECT * FROM workouts WHERE id = :id")
     suspend fun getWorkoutEntity(id: Long): WorkoutEntity?
+
+    @Query(
+        "SELECT DISTINCT exercise_name FROM workout_items " +
+            "WHERE exercise_name IS NOT NULL AND exercise_name <> '' " +
+            "ORDER BY exercise_name"
+    )
+    suspend fun getDistinctExerciseNames(): List<String>
 }

@@ -12,7 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.workoutlogger.ui.screens.dashboard.DashboardRoute
-import com.example.workoutlogger.ui.screens.heatmap.HeatmapRoute
+import com.example.workoutlogger.ui.screens.achievements.AchievementsRoute
 import com.example.workoutlogger.ui.screens.schedule.ScheduleRoute
 import com.example.workoutlogger.ui.screens.session.SessionRoute
 import com.example.workoutlogger.ui.screens.settings.SettingsRoute
@@ -84,7 +84,7 @@ fun WorkoutNavHost(
         }
 
         composable(AppDestination.Heatmap.route) {
-            HeatmapRoute(
+            AchievementsRoute(
                 onOpenSession = { sessionId ->
                     navController.navigate(AppDestination.session(sessionId))
                 },

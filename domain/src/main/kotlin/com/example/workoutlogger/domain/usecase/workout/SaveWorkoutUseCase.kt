@@ -3,13 +3,15 @@ package com.example.workoutlogger.domain.usecase.workout
 import com.example.workoutlogger.domain.model.WorkoutItemType
 import com.example.workoutlogger.domain.model.Workout
 import com.example.workoutlogger.domain.repository.WorkoutRepository
+import com.example.workoutlogger.domain.usecase.achievements.EvaluateAchievementsUseCase
 import javax.inject.Inject
 
 /**
  * Persists a workout and normalises its items.
  */
 class SaveWorkoutUseCase @Inject constructor(
-    private val workoutRepository: WorkoutRepository
+    private val workoutRepository: WorkoutRepository,
+    private val evaluateAchievementsUseCase: EvaluateAchievementsUseCase
 ) {
     suspend operator fun invoke(workout: Workout): Long {
         require(workout.name.isNotBlank()) { "Workout name cannot be blank" }
@@ -25,6 +27,8 @@ class SaveWorkoutUseCase @Inject constructor(
                     WorkoutItemType.SUPERSET_HEADER -> item.copy(position = index)
                 }
             }
-        return workoutRepository.upsertWorkout(workout.copy(items = normalisedItems))
+        val id = workoutRepository.upsertWorkout(workout.copy(items = normalisedItems))
+        evaluateAchievementsUseCase()
+        return id
     }
 }

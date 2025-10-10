@@ -35,6 +35,14 @@ interface SessionDao {
     fun observeSessionsBetween(startEpoch: Long, endEpoch: Long): Flow<List<SessionWithExercises>>
 
     @Transaction
+    @Query("SELECT * FROM workout_sessions WHERE started_at BETWEEN :startEpoch AND :endEpoch ORDER BY started_at ASC")
+    suspend fun getSessionsBetween(startEpoch: Long, endEpoch: Long): List<SessionWithExercises>
+
+    @Transaction
+    @Query("SELECT * FROM workout_sessions ORDER BY started_at ASC")
+    suspend fun getAllSessions(): List<SessionWithExercises>
+
+    @Transaction
     @Query("SELECT * FROM workout_sessions WHERE status = :status ORDER BY started_at DESC LIMIT 1")
     suspend fun getLatestSessionByStatus(status: SessionStatus): SessionWithExercises?
 

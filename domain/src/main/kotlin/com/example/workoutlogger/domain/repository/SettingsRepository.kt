@@ -11,4 +11,8 @@ interface SettingsRepository {
     val notificationPermissionRequested: Flow<Boolean>
 
     suspend fun setNotificationPermissionRequested(requested: Boolean)
+
+    val bodyWeightKg: Flow<Double?>
+
+    suspend fun setBodyWeightKg(weightKg: Double?)
 }

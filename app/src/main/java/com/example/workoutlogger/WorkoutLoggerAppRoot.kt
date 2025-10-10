@@ -6,10 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.DirectionsRun
+import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -79,7 +80,7 @@ fun WorkoutLoggerAppRoot(startWorkoutId: Long? = null) {
                                     imageVector = when (destination) {
                                         AppDestination.Dashboard -> Icons.Rounded.Home
                                         AppDestination.Templates -> Icons.Rounded.DirectionsRun
-                                        AppDestination.Heatmap -> Icons.Rounded.BarChart
+                                        AppDestination.Heatmap -> Icons.Rounded.EmojiEvents
                                         AppDestination.Settings -> Icons.Rounded.Settings
                                         else -> Icons.Rounded.Home
                                     },

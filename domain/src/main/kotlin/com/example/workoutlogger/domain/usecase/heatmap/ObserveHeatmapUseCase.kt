@@ -7,7 +7,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
-import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
@@ -22,7 +22,7 @@ class ObserveHeatmapUseCase @Inject constructor(
 ) {
     operator fun invoke(timeZone: TimeZone = TimeZone.currentSystemDefault()): Flow<List<HeatmapEntry>> {
         val today = Clock.System.now().toLocalDateTime(timeZone).date
-        val start = today.minus(DatePeriod(months = 12))
+        val start = today.minus(12, DateTimeUnit.MONTH)
         val sessionsFlow = sessionRepository.observeSessionsByDateRange(start, today)
         return sessionsFlow.map { sessions ->
             val completedByDate = sessions
@@ -41,7 +41,7 @@ class ObserveHeatmapUseCase @Inject constructor(
         var current = start
         while (current <= endInclusive) {
             yield(current)
-            current = current.plus(DatePeriod(days = 1))
+            current = current.plus(1, DateTimeUnit.DAY)
         }
     }
 }

@@ -22,6 +22,8 @@ interface WorkoutRepository {
     suspend fun upsertSchedule(schedule: WorkoutSchedule)
 
     suspend fun deleteScheduleForWorkout(workoutId: Long)
+
+    suspend fun getDistinctExerciseNames(): List<String>
 }
 
 // Backwards-compatible alias until all callers migrate.

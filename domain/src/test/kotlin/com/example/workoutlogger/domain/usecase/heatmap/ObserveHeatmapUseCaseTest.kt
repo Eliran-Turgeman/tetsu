@@ -12,13 +12,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import kotlinx.datetime.DatePeriod
 import kotlin.time.Duration.Companion.hours
 
 class ObserveHeatmapUseCaseTest {
@@ -46,7 +46,7 @@ class ObserveHeatmapUseCaseTest {
     fun `marks days with completed sessions`() = runBlocking {
         val timeZone = TimeZone.UTC
         val today = LocalDate(2024, 5, 1)
-        val sessionDay = today.minus(DatePeriod(days = 1))
+        val sessionDay = today.minus(1, DateTimeUnit.DAY)
         sessionsFlow.value = listOf(
             WorkoutSession(
                 id = 1,

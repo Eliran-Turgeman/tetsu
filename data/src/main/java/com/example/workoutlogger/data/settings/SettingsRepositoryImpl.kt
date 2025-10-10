@@ -3,6 +3,7 @@ package com.example.workoutlogger.data.settings
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.workoutlogger.domain.model.WeightUnit
@@ -19,6 +20,7 @@ class SettingsRepositoryImpl @Inject constructor(
 
     private val defaultUnitKey = stringPreferencesKey("default_weight_unit")
     private val notificationPermissionKey = booleanPreferencesKey("notification_permission_requested")
+    private val bodyWeightKey = doublePreferencesKey("body_weight_kg")
 
     override val defaultWeightUnit: Flow<WeightUnit> = dataStore.data.map { prefs ->
         prefs[defaultUnitKey]?.let { runCatching { WeightUnit.valueOf(it) }.getOrNull() } ?: WeightUnit.KG
@@ -37,6 +39,20 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setNotificationPermissionRequested(requested: Boolean) {
         dataStore.edit { prefs ->
             prefs[notificationPermissionKey] = requested
+        }
+    }
+
+    override val bodyWeightKg: Flow<Double?> = dataStore.data.map { prefs ->
+        prefs[bodyWeightKey]
+    }
+
+    override suspend fun setBodyWeightKg(weightKg: Double?) {
+        dataStore.edit { prefs ->
+            if (weightKg == null) {
+                prefs.remove(bodyWeightKey)
+            } else {
+                prefs[bodyWeightKey] = weightKg
+            }
         }
     }
 }

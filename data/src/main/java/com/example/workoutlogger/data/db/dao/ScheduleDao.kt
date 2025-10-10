@@ -20,6 +20,9 @@ interface ScheduleDao {
     @Query("SELECT * FROM workout_schedules WHERE workout_id = :workoutId LIMIT 1")
     suspend fun getScheduleForWorkout(workoutId: Long): WorkoutScheduleEntity?
 
+    @Query("SELECT * FROM workout_schedules")
+    suspend fun getSchedules(): List<WorkoutScheduleEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(schedule: WorkoutScheduleEntity): Long
 

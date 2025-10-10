@@ -6,16 +6,22 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.workoutlogger.data.db.WorkoutLoggerDatabase
+import com.example.workoutlogger.data.db.dao.AchievementsDao
 import com.example.workoutlogger.data.db.dao.ScheduleDao
 import com.example.workoutlogger.data.db.dao.SessionDao
 import com.example.workoutlogger.data.db.dao.WorkoutDao
+import com.example.workoutlogger.data.db.migration.MIGRATION_1_2
 import com.example.workoutlogger.data.repository.SessionRepositoryImpl
 import com.example.workoutlogger.data.repository.WorkoutRepositoryImpl
 import com.example.workoutlogger.data.settings.SettingsRepositoryImpl
 import com.example.workoutlogger.domain.repository.SessionRepository
 import com.example.workoutlogger.domain.repository.SettingsRepository
 import com.example.workoutlogger.domain.repository.WorkoutRepository
+import com.example.workoutlogger.data.repository.AchievementsRepositoryImpl
+import com.example.workoutlogger.domain.repository.AchievementsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -39,6 +45,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAchievementsRepository(impl: AchievementsRepositoryImpl): AchievementsRepository
 }
 
 @Module
@@ -55,7 +65,9 @@ object DatabaseModule {
             context,
             WorkoutLoggerDatabase::class.java,
             DATABASE_NAME
-        ).fallbackToDestructiveMigration().build()
+        ).addMigrations(MIGRATION_1_2)
+            .addCallback(SeedCallback)
+            .build()
     }
 
     @Provides
@@ -68,10 +80,21 @@ object DatabaseModule {
     fun provideScheduleDao(database: WorkoutLoggerDatabase): ScheduleDao = database.scheduleDao()
 
     @Provides
+    fun provideAchievementsDao(database: WorkoutLoggerDatabase): AchievementsDao = database.achievementsDao()
+
+    @Provides
     @Singleton
     fun providePreferenceDataStore(
         @ApplicationContext context: Context
     ): DataStore<Preferences> = PreferenceDataStoreFactory.create {
         context.preferencesDataStoreFile(DATASTORE_NAME)
+    }
+}
+
+private object SeedCallback : RoomDatabase.Callback() {
+    override fun onCreate(db: SupportSQLiteDatabase) {
+        super.onCreate(db)
+        com.example.workoutlogger.data.achievements.AchievementSeedData.insertDefinitions(db)
+        com.example.workoutlogger.data.achievements.AchievementSeedData.insertInstancesFromDefinitions(db, System.currentTimeMillis())
     }
 }
