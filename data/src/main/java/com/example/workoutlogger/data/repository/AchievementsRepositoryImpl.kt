@@ -198,7 +198,7 @@ class AchievementsRepositoryImpl @Inject constructor(
 
     override suspend fun evaluateNow(): List<AchievementEvent> {
         val now = Clock.System.now()
-        val aggregated = rebuildAggregatedData(now)
+        val aggregated = rebuildAggregatedData()
         val userSettings = loadUserSettings()
         val emittedEvents = mutableListOf<AchievementEvent>()
 
@@ -354,7 +354,8 @@ class AchievementsRepositoryImpl @Inject constructor(
     private val upperKeywords = setOf("press", "row", "curl", "fly", "pull", "chin", "dip", "bench", "push", "shoulder")
     private val lowerKeywords = setOf("squat", "deadlift", "lunge", "leg", "calf", "glute", "hip", "hamstring", "quad")
 
-    private suspend fun rebuildAggregatedData(now: Instant): AggregatedData {
+    private suspend fun rebuildAggregatedData(): AggregatedData {
+        removeCancelledSessions()
         val sessions = sessionDao.getAllSessions()
         val daily = mutableMapOf<LocalDate, DailyAccumulator>()
         val exerciseAcc = mutableMapOf<String, ExerciseAccumulator>()
@@ -362,8 +363,11 @@ class AchievementsRepositoryImpl @Inject constructor(
 
         val eightAm = LocalTime(hour = 8, minute = 0)
 
-        sessions.forEach { sessionWithExercises ->
+        for (sessionWithExercises in sessions) {
             val session = sessionWithExercises.session
+            if (session.status != SessionStatus.COMPLETED) {
+                continue
+            }
             val sessionDate = (session.endedAt ?: session.startedAt).toLocalDateTime(timeZone).date
             val accumulator = daily.getOrPut(sessionDate) { DailyAccumulator() }
             accumulator.sessions += 1
@@ -379,9 +383,9 @@ class AchievementsRepositoryImpl @Inject constructor(
             } ?: 0
             accumulator.minutesActive += durationMinutes
 
-            sessionWithExercises.exercises.forEach { exerciseWithSets ->
+            for (exerciseWithSets in sessionWithExercises.exercises) {
                 val name = exerciseWithSets.exercise.exerciseName.trim()
-                if (name.isEmpty()) return@forEach
+                if (name.isEmpty()) continue
                 val normalised = name.lowercase()
                 accumulator.uniqueExercises.add(normalised)
                 val (categoryMask, upperLowerMask) = classifyExercise(name)
@@ -418,10 +422,8 @@ class AchievementsRepositoryImpl @Inject constructor(
                 }
             }
 
-            if (session.status == SessionStatus.COMPLETED) {
-                session.workoutId?.let { workoutId ->
-                    completedByWorkout.getOrPut(workoutId) { mutableSetOf() }.add(sessionDate)
-                }
+            session.workoutId?.let { workoutId ->
+                completedByWorkout.getOrPut(workoutId) { mutableSetOf() }.add(sessionDate)
             }
         }
 
@@ -506,6 +508,19 @@ class AchievementsRepositoryImpl @Inject constructor(
         var bestOneRmKg: Double? = null,
         val performances: MutableList<ExercisePerformance> = mutableListOf()
     )
+
+    private suspend fun removeCancelledSessions() {
+        val cancelledSessions = sessionDao.getSessionsByStatus(SessionStatus.CANCELLED)
+        if (cancelledSessions.isEmpty()) return
+        database.withTransaction {
+            cancelledSessions.forEach { sessionWithExercises ->
+                val sessionId = sessionWithExercises.session.id
+                sessionDao.deleteSetsBySessionId(sessionId)
+                sessionDao.deleteExercisesBySessionId(sessionId)
+                sessionDao.deleteSession(sessionWithExercises.session)
+            }
+        }
+    }
 
     private data class AggregatedData(
         val summaries: List<WorkoutDailySummaryEntity>,

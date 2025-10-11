@@ -16,7 +16,6 @@ import com.example.workoutlogger.domain.model.WorkoutSession
 import com.example.workoutlogger.domain.repository.SessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -53,7 +52,9 @@ class SessionRepositoryImpl @Inject constructor(
         val startEpoch = startInstant.toEpochMilliseconds()
         val endOfDayMillis = endDate.atStartOfDayIn(timeZone).toEpochMilliseconds() + MILLIS_IN_DAY - 1
         return sessionDao.observeSessionsBetween(startEpoch, endOfDayMillis).map { sessions ->
-            sessions.map { it.toDomain() }
+            sessions
+                .filter { it.session.status != SessionStatus.CANCELLED }
+                .map { it.toDomain() }
         }
     }
 
@@ -204,13 +205,9 @@ class SessionRepositoryImpl @Inject constructor(
     override suspend fun cancelSession(sessionId: Long) {
         database.withTransaction {
             val entity = sessionDao.getSessionById(sessionId) ?: return@withTransaction
-            val endTime = entity.endedAt ?: Clock.System.now()
-            sessionDao.updateSession(
-                entity.copy(
-                    status = SessionStatus.CANCELLED,
-                    endedAt = endTime
-                )
-            )
+            sessionDao.deleteSetsBySessionId(sessionId)
+            sessionDao.deleteExercisesBySessionId(sessionId)
+            sessionDao.deleteSession(entity)
         }
     }
 

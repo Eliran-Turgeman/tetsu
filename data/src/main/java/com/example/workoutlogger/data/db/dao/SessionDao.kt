@@ -64,6 +64,22 @@ interface SessionDao {
     @Query("DELETE FROM session_set_logs WHERE session_exercise_id = :exerciseId")
     suspend fun deleteSetsByExerciseId(exerciseId: Long)
 
+    @Query(
+        "DELETE FROM session_set_logs WHERE session_exercise_id IN " +
+            "(SELECT id FROM session_exercises WHERE session_id = :sessionId)"
+    )
+    suspend fun deleteSetsBySessionId(sessionId: Long)
+
+    @Query("DELETE FROM session_exercises WHERE session_id = :sessionId")
+    suspend fun deleteExercisesBySessionId(sessionId: Long)
+
+    @Transaction
+    @Query("SELECT * FROM workout_sessions WHERE status = :status")
+    suspend fun getSessionsByStatus(status: SessionStatus): List<SessionWithExercises>
+
+    @Delete
+    suspend fun deleteSession(session: WorkoutSessionEntity)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSetLog(setLog: SessionSetLogEntity): Long
 

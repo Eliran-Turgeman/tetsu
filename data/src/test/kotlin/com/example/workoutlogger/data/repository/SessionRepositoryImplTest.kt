@@ -4,17 +4,23 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.workoutlogger.data.db.WorkoutLoggerDatabase
-import com.example.workoutlogger.data.db.entity.TemplateItemEntity
-import com.example.workoutlogger.data.db.entity.TemplateItemType
-import com.example.workoutlogger.data.db.entity.WorkoutTemplateEntity
+import com.example.workoutlogger.data.db.dao.SessionDao
+import com.example.workoutlogger.data.db.dao.WorkoutDao
+import com.example.workoutlogger.data.db.entity.SessionStatus
+import com.example.workoutlogger.data.db.entity.WorkoutEntity
+import com.example.workoutlogger.data.db.entity.WorkoutItemEntity
+import com.example.workoutlogger.data.db.entity.WorkoutItemType
 import com.example.workoutlogger.domain.model.SessionSetLog
 import com.example.workoutlogger.domain.model.WeightUnit
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+import org.junit.Assert.assertNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -23,50 +29,35 @@ class SessionRepositoryImplTest {
 
     private lateinit var database: WorkoutLoggerDatabase
     private lateinit var repository: SessionRepositoryImpl
+    private lateinit var sessionDao: SessionDao
+    private lateinit var workoutDao: WorkoutDao
 
-    @BeforeTest
+    @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         database = Room.inMemoryDatabaseBuilder(context, WorkoutLoggerDatabase::class.java)
             .allowMainThreadQueries()
             .build()
+        sessionDao = database.sessionDao()
+        workoutDao = database.workoutDao()
         repository = SessionRepositoryImpl(
             database = database,
-            sessionDao = database.sessionDao(),
-            templateDao = database.templateDao()
+            sessionDao = sessionDao,
+            workoutDao = workoutDao
         )
     }
 
-    @AfterTest
+    @After
     fun tearDown() {
         database.close()
     }
 
     @Test
     fun `returns previous performance with best set`() = runTest {
-        val templateId = database.templateDao().insertTemplate(
-            WorkoutTemplateEntity(
-                name = "Push",
-                createdAt = Instant.parse("2024-04-01T00:00:00Z")
-            )
-        )
-        database.templateDao().insertTemplateItems(
-            listOf(
-                TemplateItemEntity(
-                    templateId = templateId,
-                    position = 0,
-                    type = TemplateItemType.EXERCISE,
-                    supersetGroupId = "A",
-                    exerciseName = "Bench Press",
-                    sets = 2,
-                    repsMin = 6,
-                    repsMax = 8
-                )
-            )
-        )
+        val workoutId = seedWorkout()
 
-        val firstSession = repository.startSessionFromTemplate(
-            templateId,
+        val firstSession = repository.startSessionFromWorkout(
+            workoutId,
             Instant.parse("2024-04-07T08:00:00Z")
         )
         val bench = firstSession.exercises.first()
@@ -88,8 +79,8 @@ class SessionRepositoryImplTest {
         }
         repository.finishSession(firstSession.id!!, Instant.parse("2024-04-07T09:00:00Z"))
 
-        val secondSession = repository.startSessionFromTemplate(
-            templateId,
+        val secondSession = repository.startSessionFromWorkout(
+            workoutId,
             Instant.parse("2024-04-14T08:00:00Z")
         )
 
@@ -98,5 +89,76 @@ class SessionRepositoryImplTest {
         assertEquals(2, previous.sets.size)
         assertEquals(62.5, previous.bestSet?.loggedWeight)
         assertEquals(7, previous.bestSet?.loggedReps)
+    }
+
+    @Test
+    fun `cancel session removes session and logs`() = runTest {
+        val workoutId = seedWorkout()
+        val session = repository.startSessionFromWorkout(
+            workoutId,
+            Instant.parse("2024-05-01T08:00:00Z")
+        )
+        val sessionId = session.id!!
+        val exerciseId = session.exercises.first().id!!
+        val setId = session.exercises.first().sets.first().id!!
+
+        repository.cancelSession(sessionId)
+
+        assertNull(sessionDao.getSessionById(sessionId))
+        assertNull(sessionDao.getExerciseById(exerciseId))
+        assertNull(sessionDao.getSetLogById(setId))
+    }
+
+    @Test
+    fun `observeSessionsByDateRange excludes cancelled sessions`() = runTest {
+        val workoutId = seedWorkout()
+        val session = repository.startSessionFromWorkout(
+            workoutId,
+            Instant.parse("2024-05-01T08:00:00Z")
+        )
+        repository.finishSession(session.id!!, Instant.parse("2024-05-01T09:00:00Z"))
+
+        // Insert a cancelled session manually to mimic existing data from older versions.
+        database.sessionDao().insertSession(
+            com.example.workoutlogger.data.db.entity.WorkoutSessionEntity(
+                workoutId = workoutId,
+                workoutNameSnapshot = "Push",
+                startedAt = Instant.parse("2024-05-02T08:00:00Z"),
+                endedAt = Instant.parse("2024-05-02T08:30:00Z"),
+                status = SessionStatus.CANCELLED
+            )
+        )
+
+        val sessions = repository.observeSessionsByDateRange(
+            LocalDate(2024, 5, 1),
+            LocalDate(2024, 5, 7)
+        ).first()
+
+        assertEquals(1, sessions.size)
+        assertEquals(com.example.workoutlogger.domain.model.WorkoutStatus.COMPLETED, sessions.single().status)
+    }
+
+    private suspend fun seedWorkout(): Long {
+        val workoutId = workoutDao.insertWorkout(
+            WorkoutEntity(
+                name = "Push",
+                createdAt = Instant.parse("2024-04-01T00:00:00Z")
+            )
+        )
+        workoutDao.insertWorkoutItems(
+            listOf(
+                WorkoutItemEntity(
+                    workoutId = workoutId,
+                    position = 0,
+                    type = WorkoutItemType.EXERCISE,
+                    supersetGroupId = "A",
+                    exerciseName = "Bench Press",
+                    sets = 2,
+                    repsMin = 6,
+                    repsMax = 8
+                )
+            )
+        )
+        return workoutId
     }
 }
