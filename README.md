@@ -21,7 +21,7 @@ Or clone and build the latest version from source
 
 ```bash
 # Clone the repository
-$ git clone https://github.com/your-org/tetsu.git
+$ git clone https://github.com/Eliran-Turgeman/tetsu.git
 $ cd tetsu
 
 # Build the debug APK
