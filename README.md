@@ -6,10 +6,10 @@
 
 
 <p align="left">
-  <img src="docs/assets/tetsu_dashboard.png" alt="dashboard, view existing templates" width="15%" height="60%"></a>
-  <img src="docs/assets/tetsu_create_template.png" alt="create a new template (workout)" width="15%" height="60%"></a>
-  <img src="docs/assets/tetsu_progress.png" alt="track progress, consitency, and achievements" width="15%" height="60%"></a>
-  <img src="docs/assets/tetsu_create_goal.png" alt="create a custom achievement" width="15%" height="60%"></a>
+  <img src="docs/assets/tetsu_dashboard.png" alt="dashboard, view existing templates" width="24%"></a>
+  <img src="docs/assets/tetsu_create_template.png" alt="create a new template (workout)" width="24%"></a>
+  <img src="docs/assets/tetsu_progress.png" alt="track progress, consitency, and achievements" width="24%"></a>
+  <img src="docs/assets/tetsu_create_goal.png" alt="create a custom achievement" width="24%"></a>
 </p>
 
 
