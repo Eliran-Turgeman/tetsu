@@ -79,15 +79,17 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 
     val fileFilter = listOf(
         "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
-        "**/*\\$ViewInjector*.*", "**/*\\$ViewBinder*.*",
+        "**/*${'$'}ViewInjector*.*", "**/*${'$'}ViewBinder*.*",
         "**/*_MembersInjector.class", "**/Hilt_*",
         "**/*_Factory.*", "**/*_Provide*Factory*.*", "**/*_GeneratedInjector.*"
     )
 
-    val kotlinClasses = fileTree("${'$'}{buildDir}/tmp/kotlin-classes/debug") {
+    val buildDirPath = layout.buildDirectory.get().asFile
+
+    val kotlinClasses = fileTree(buildDirPath.resolve("tmp/kotlin-classes/debug")) {
         exclude(fileFilter)
     }
-    val javaClasses = fileTree("${'$'}{buildDir}/intermediates/javac/debug/classes") {
+    val javaClasses = fileTree(buildDirPath.resolve("intermediates/javac/debug/classes")) {
         exclude(fileFilter)
     }
     classDirectories.setFrom(files(kotlinClasses, javaClasses))
@@ -95,7 +97,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
 
     executionData.setFrom(
-        fileTree(buildDir) {
+        fileTree(buildDirPath) {
             include(
                 "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
                 "jacoco/testDebugUnitTest.exec",
