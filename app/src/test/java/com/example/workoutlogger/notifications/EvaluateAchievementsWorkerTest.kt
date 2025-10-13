@@ -20,7 +20,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
+import org.junit.runner.RunWith
 
+@RunWith(org.robolectric.RobolectricTestRunner::class)
 class EvaluateAchievementsWorkerTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()

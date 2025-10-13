@@ -55,13 +55,8 @@ class StreakEvaluator : Evaluator {
                 streak += 1
                 dates.removeAt(0)
                 cursor = cursor.minusDays(1)
-            } else if (date < cursor) {
-                cursor = cursor.minusDays(1)
-                if (date < cursor) {
-                    break
-                }
             } else {
-                dates.removeAt(0)
+                break
             }
         }
         val percent = if (def.targetValue == 0.0) 1.0 else min(1.0, streak.toDouble() / def.targetValue)
