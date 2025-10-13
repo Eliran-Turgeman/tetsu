@@ -230,4 +230,30 @@ class SessionRepositoryImpl @Inject constructor(
             bestSet = bestSet
         )
     }
+
+    override suspend fun getAllSessions(): List<WorkoutSession> {
+        return sessionDao.getAllSessions().map { it.toDomain() }
+    }
+
+    override suspend fun importSessions(sessions: List<WorkoutSession>) {
+        if (sessions.isEmpty()) return
+        database.withTransaction {
+            sessions.forEach { session ->
+                val sessionId = sessionDao.insertSession(session.toEntity().copy(id = 0))
+                session.exercises.sortedBy { it.position }.forEach { exercise ->
+                    val exerciseId = sessionDao.insertExercise(
+                        exercise.toEntity(sessionId).copy(id = 0, sessionId = sessionId)
+                    )
+                    exercise.sets.sortedBy { it.setIndex }.forEach { set ->
+                        sessionDao.insertSetLog(
+                            set.copy(sessionExerciseId = exerciseId).toEntity(exerciseId).copy(
+                                id = 0,
+                                sessionExerciseId = exerciseId
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
