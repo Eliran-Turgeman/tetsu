@@ -67,6 +67,17 @@
     <string name="label_status_completed">Completed</string>
     <string name="label_status_cancelled">Cancelled</string>
     <string name="label_settings_notifications">Notifications</string>
+    <string name="label_settings_data">Data</string>
+    <string name="label_export_strong_csv">Export Strong/Hevy CSV</string>
+    <string name="label_export_fitnotes_csv">Export FitNotes iOS CSV</string>
+    <string name="label_export_json_backup">Export JSON backup</string>
+    <string name="label_import_workout_data">Import CSV or JSON</string>
+    <string name="snackbar_export_csv_strong_success">Strong/Hevy CSV exported.</string>
+    <string name="snackbar_export_csv_fitnotes_success">FitNotes CSV exported.</string>
+    <string name="snackbar_export_json_success">JSON backup exported.</string>
+    <string name="snackbar_import_success">%1$d workouts imported (%2$d sets).</string>
+    <string name="error_open_destination">Unable to open the selected destination.</string>
+    <string name="error_open_document">Unable to open the selected file.</string>
     <string name="label_settings_units">Units</string>
     <string name="dialog_delete_template_title">Delete template</string>
     <string name="dialog_delete_template_message">This will not remove past sessions.</string>
