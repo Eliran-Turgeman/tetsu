@@ -79,7 +79,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 
     val fileFilter = listOf(
         "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
-        "**/*$ViewInjector*.*", "**/*$ViewBinder*.*",
+        "**/*\\$ViewInjector*.*", "**/*\\$ViewBinder*.*",
         "**/*_MembersInjector.class", "**/Hilt_*",
         "**/*_Factory.*", "**/*_Provide*Factory*.*", "**/*_GeneratedInjector.*"
     )
