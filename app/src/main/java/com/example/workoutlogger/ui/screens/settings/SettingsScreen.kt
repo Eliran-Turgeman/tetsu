@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -36,10 +37,15 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.workoutlogger.R
+import com.example.workoutlogger.domain.importexport.CsvProfileType
 import com.example.workoutlogger.domain.model.WeightUnit
 import com.example.workoutlogger.ui.components.PrimaryButton
 import com.example.workoutlogger.ui.components.SecondaryButton
 import com.example.workoutlogger.ui.components.SectionHeader
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlinx.coroutines.launch
 import com.example.workoutlogger.ui.components.SegmentedControl
 
 @Composable
@@ -50,6 +56,26 @@ fun SettingsRoute(
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            val message = when (event) {
+                is SettingsEvent.ExportCsvSuccess -> when (event.profile) {
+                    CsvProfileType.STRONG_HEVY -> context.getString(R.string.snackbar_export_csv_strong_success)
+                    CsvProfileType.FITNOTES_IOS -> context.getString(R.string.snackbar_export_csv_fitnotes_success)
+                }
+                SettingsEvent.ExportJsonSuccess -> context.getString(R.string.snackbar_export_json_success)
+                is SettingsEvent.ImportSuccess -> context.getString(
+                    R.string.snackbar_import_success,
+                    event.result.workouts,
+                    event.result.sets
+                )
+                is SettingsEvent.Error -> event.message
+            }
+            snackbarHostState.showSnackbar(message)
+        }
+    }
 
     LaunchedEffect(Unit) {
         val granted = isNotificationGranted(context)
@@ -61,6 +87,72 @@ fun SettingsRoute(
         viewModel.markPermissionRequested()
     }
 
+    val exportStrongLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        if (uri != null) {
+            coroutineScope.launch {
+                runCatching {
+                    context.contentResolver.openOutputStream(uri)?.use { stream ->
+                        viewModel.exportCsv(CsvProfileType.STRONG_HEVY, stream)
+                    } ?: viewModel.reportError(context.getString(R.string.error_open_destination))
+                }.onFailure { throwable ->
+                    viewModel.reportError(throwable.message ?: context.getString(R.string.error_open_destination))
+                }
+            }
+        }
+    }
+
+    val exportFitNotesLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        if (uri != null) {
+            coroutineScope.launch {
+                runCatching {
+                    context.contentResolver.openOutputStream(uri)?.use { stream ->
+                        viewModel.exportCsv(CsvProfileType.FITNOTES_IOS, stream)
+                    } ?: viewModel.reportError(context.getString(R.string.error_open_destination))
+                }.onFailure { throwable ->
+                    viewModel.reportError(throwable.message ?: context.getString(R.string.error_open_destination))
+                }
+            }
+        }
+    }
+
+    val exportJsonLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri != null) {
+            coroutineScope.launch {
+                runCatching {
+                    context.contentResolver.openOutputStream(uri)?.use { stream ->
+                        viewModel.exportJson(stream)
+                    } ?: viewModel.reportError(context.getString(R.string.error_open_destination))
+                }.onFailure { throwable ->
+                    viewModel.reportError(throwable.message ?: context.getString(R.string.error_open_destination))
+                }
+            }
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            coroutineScope.launch {
+                runCatching {
+                    val mime = context.contentResolver.getType(uri)?.lowercase(Locale.US)
+                    val isJson = mime?.contains("json") == true || uri.toString().lowercase(Locale.US).endsWith(".json")
+                    context.contentResolver.openInputStream(uri)?.use { stream ->
+                        if (isJson) {
+                            viewModel.importJson(stream)
+                        } else {
+                            viewModel.importCsv(stream)
+                        }
+                    } ?: viewModel.reportError(context.getString(R.string.error_open_document))
+                }.onFailure { throwable ->
+                    viewModel.reportError(throwable.message ?: context.getString(R.string.error_open_document))
+                }
+            }
+        }
+    }
+
+    val supportedImportMimeTypes = remember {
+        arrayOf("text/*", "application/json", "application/octet-stream")
+    }
+
     SettingsScreen(
         state = state,
         snackbarHostState = snackbarHostState,
@@ -70,7 +162,11 @@ fun SettingsRoute(
                 launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         },
-        onOpenNotificationSettings = onOpenNotificationSettings
+        onOpenNotificationSettings = onOpenNotificationSettings,
+        onExportStrongCsv = { fileName -> exportStrongLauncher.launch(fileName) },
+        onExportFitNotesCsv = { fileName -> exportFitNotesLauncher.launch(fileName) },
+        onExportJson = { fileName -> exportJsonLauncher.launch(fileName) },
+        onImportData = { importLauncher.launch(supportedImportMimeTypes) }
     )
 }
 
@@ -89,10 +185,15 @@ private fun SettingsScreen(
     snackbarHostState: SnackbarHostState,
     onSelectUnit: (WeightUnit) -> Unit,
     onRequestPermission: () -> Unit,
-    onOpenNotificationSettings: () -> Unit
+    onOpenNotificationSettings: () -> Unit,
+    onExportStrongCsv: (String) -> Unit,
+    onExportFitNotesCsv: (String) -> Unit,
+    onExportJson: (String) -> Unit,
+    onImportData: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val units = remember { WeightUnit.values() }
+    val fileFormatter = remember { DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss") }
 
     Scaffold(
         modifier = Modifier
@@ -149,6 +250,45 @@ private fun SettingsScreen(
                             SecondaryButton(
                                 text = stringResource(id = R.string.content_description_open_settings),
                                 onClick = onOpenNotificationSettings
+                            )
+                        }
+                    }
+                }
+            }
+
+            item("data") {
+                SettingsCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        SectionHeader(title = stringResource(id = R.string.label_settings_data))
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            SecondaryButton(
+                                text = stringResource(id = R.string.label_export_strong_csv),
+                                onClick = {
+                                    val timestamp = LocalDateTime.now().format(fileFormatter)
+                                    onExportStrongCsv("tetsu-${timestamp}-strong.csv")
+                                },
+                                enabled = !state.isProcessing
+                            )
+                            SecondaryButton(
+                                text = stringResource(id = R.string.label_export_fitnotes_csv),
+                                onClick = {
+                                    val timestamp = LocalDateTime.now().format(fileFormatter)
+                                    onExportFitNotesCsv("tetsu-${timestamp}-fitnotes.csv")
+                                },
+                                enabled = !state.isProcessing
+                            )
+                            SecondaryButton(
+                                text = stringResource(id = R.string.label_export_json_backup),
+                                onClick = {
+                                    val timestamp = LocalDateTime.now().format(fileFormatter)
+                                    onExportJson("tetsu-${timestamp}-backup.json")
+                                },
+                                enabled = !state.isProcessing
+                            )
+                            PrimaryButton(
+                                text = stringResource(id = R.string.label_import_workout_data),
+                                onClick = onImportData,
+                                enabled = !state.isProcessing
                             )
                         }
                     }

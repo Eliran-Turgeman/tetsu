@@ -34,4 +34,8 @@ interface SessionRepository {
     suspend fun cancelSession(sessionId: Long)
 
     suspend fun getPreviousPerformance(exerciseName: String, before: Instant): PreviousPerformance?
+
+    suspend fun getAllSessions(): List<WorkoutSession>
+
+    suspend fun importSessions(sessions: List<WorkoutSession>)
 }
