@@ -42,6 +42,10 @@ class ObserveHeatmapUseCaseTest {
         override suspend fun finishSession(sessionId: Long, endedAt: Instant) = Unit
         override suspend fun cancelSession(sessionId: Long) = Unit
         override suspend fun getPreviousPerformance(exerciseName: String, before: Instant) = null
+        override suspend fun getAllSessions(): List<WorkoutSession> = sessionsFlow.value
+        override suspend fun importSessions(sessions: List<WorkoutSession>) {
+            sessionsFlow.value = sessions
+        }
     }
 
     private val useCase = ObserveHeatmapUseCase(repository)
