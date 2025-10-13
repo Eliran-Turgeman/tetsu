@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  pullrequest:
   push:
     branches:
       - master
