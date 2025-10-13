@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tetsu — Log. Lift. Leave.</title>
+  <meta name="description" content="A fast, no-BS workout logger for Android. Simple. Private. Free. No ads. Open source." />
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="tetsu — Log. Lift. Leave.">
+  <meta property="og:description" content="A fast, no-BS workout logger for Android. Simple. Private. Free. No ads. Open source.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://eliran-turgeman.github.io/tetsu/">
+  <!-- Replace when you have a banner -->
+  <meta property="og:image" content="https://eliran-turgeman.github.io/tetsu/assets/og-banner.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <style>
+    :root {
+      --bg:#0f0f10; --card:#161618; --line:#26262a; --text:#eaeaea; --muted:#a0a0a0; --accent:#ffffff;
+    }
+    * { box-sizing: border-box }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Inter, Arial, sans-serif; background:var(--bg); color:var(--text); line-height:1.6 }
+    a { color: var(--text); text-decoration: none }
+    a:hover { opacity:.9 }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 48px 20px }
+    header { display:flex; align-items:center; gap:16px; margin-bottom:18px }
+    .logo {
+      width:56px; height:56px; border-radius:14px; background:var(--card); border:1px solid var(--line);
+      display:flex; align-items:center; justify-content:center; overflow:hidden;
+    }
+    .logo img { width:100%; height:100%; object-fit:contain }
+    .brand h1 { font-size:40px; line-height:1; margin:0 }
+    .brand .tag { color:var(--muted); margin-top:6px }
+    .hero { margin: 18px 0 28px }
+    .punch { font-size:18px; color:var(--muted) }
+    .cta { display:flex; gap:12px; flex-wrap:wrap; margin:22px 0 34px }
+    .btn { background:var(--accent); color:#111; padding:12px 16px; border-radius:12px; font-weight:700 }
+    .btn.ghost { background:transparent; border:1px solid var(--line); color:var(--text) }
+    .badges { display:flex; gap:10px; flex-wrap:wrap; margin-top:4px }
+    .badge { font-size:12px; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted) }
+
+    .grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); margin-top:12px }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px }
+    .card b { display:block; margin-bottom:6px }
+
+    .shots { margin-top:28px }
+    .shots h2 { margin: 0 0 10px }
+    .shot-grid { display:grid; gap:14px; grid-template-columns: repeat(2, 1fr) }
+    @media (max-width:720px){ .shot-grid { grid-template-columns: 1fr } }
+    .shot { border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#0b0b0c }
+    .shot img { display:block; width:100%; height:auto; }
+
+    .how { margin-top:36px }
+    .how ol { padding-left: 20px }
+
+    .faq { margin-top:32px }
+    .faq p { margin:10px 0 }
+
+    footer { opacity:.6; margin-top:36px; font-size:14px }
+    .hr { height:1px; background:var(--line); margin:26px 0 }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <!-- LOGO PLACEHOLDER: drop your logo at /docs/assets/logo.svg (or .png) and update the src below -->
+      <div class="logo">
+        <img src="./assets/logo.png" alt="tetsu logo">
+      </div>
+      <div class="brand">
+        <h1>tetsu</h1>
+        <div class="tag">Log. Lift. Leave.</div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <p class="punch">
+        A fast, <b>no-BS</b> workout logger for Android. <b>Simple</b> flow. <b>Total privacy</b>. <b>Free</b>. <b>No ads</b>. Open source.
+      </p>
+      <div class="cta">
+        <a class="btn" href="https://github.com/Eliran-Turgeman/tetsu/releases">Download APK</a>
+        <a class="btn ghost" href="https://github.com/Eliran-Turgeman/tetsu">View Source</a>
+        <a class="btn ghost" href="https://github.com/Eliran-Turgeman/tetsu/stargazers">Star on GitHub</a>
+      </div>
+      <div class="badges">
+        <span class="badge">No account</span>
+        <span class="badge">No ads</span>
+        <span class="badge">No tracking</span>
+        <span class="badge">Offline by default</span>
+        <span class="badge">CSV/JSON export &amp; import</span>
+        <span class="badge">Open source</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <b>No-nonsense speed</b>
+        Open, log, done. Previous weights are always in view so you can match or beat last time without hunting through screens.
+      </div>
+      <div class="card">
+        <b>Simple by design</b>
+        Free-text exercises, clear sets &amp; rep ranges, supersets when you need them. Zero fluff, zero bloat.
+      </div>
+      <div class="card">
+        <b>Total privacy</b>
+        Your data lives on your device. No signup, no telemetry. Export to CSV/JSON any time—because it’s your data.
+      </div>
+      <div class="card">
+        <b>Open &amp; free</b>
+        100% open source. No ads. Community-friendly, with a public roadmap and good-first-issues.
+      </div>
+    </section>
+
+    <section class="shots">
+      <h2>Screenshots</h2>
+      <!-- IMAGE PLACEHOLDERS: put files in /docs/assets and update src below.
+           Suggested names: screen-1.png, screen-2.png, screen-3.png, screen-4.png -->
+      <div class="shot-grid">
+        <div class="shot"><img src="./assets/tetsu_dashboard.png" alt="tetsu home screen"></div>
+        <div class="shot"><img src="./assets/tetsu_create_template.png" alt="tetsu logging screen"></div>
+        <div class="shot"><img src="./assets/tetsu_progress.png" alt="tetsu heatmap"></div>
+        <div class="shot"><img src="./assets/tetsu_create_goal.png" alt="tetsu achievements"></div>
+      </div>
+    </section>
+
+    <section class="how">
+      <h2>How it works</h2>
+      <ol>
+        <li>Create a workout (free-text, sets, rep ranges).</li>
+        <li>Log sets with last session’s numbers visible.</li>
+        <li>Finish and view your history heatmap—or export whenever you want.</li>
+      </ol>
+    </section>
+
+    <div class="hr"></div>
+
+    <section class="faq">
+      <h2>FAQ</h2>
+      <p><b>Why another logger?</b> Most are slow or bloated. tetsu is for people who want to lift, not manage an app.</p>
+      <p><b>Play Store?</b> Coming later. Use the APK for now.</p>
+      <p><b>Where is my data stored?</b> On your device. Export/Import with CSV or JSON—no lock-in.</p>
+      <p><b>Will you add programs/AI/timers?</b> Only if they don’t slow down the core logging loop. Speed &amp; simplicity first.</p>
+    </section>
+
+    <footer>
+      Made by Eliran • <a href="https://github.com/Eliran-Turgeman/tetsu">GitHub</a>
+    </footer>
+  </main>
+</body>
+</html>

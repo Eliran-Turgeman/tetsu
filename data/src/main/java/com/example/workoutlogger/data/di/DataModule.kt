@@ -29,6 +29,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import kotlinx.serialization.json.Json
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -88,6 +89,14 @@ object DatabaseModule {
         @ApplicationContext context: Context
     ): DataStore<Preferences> = PreferenceDataStoreFactory.create {
         context.preferencesDataStoreFile(DATASTORE_NAME)
+    }
+
+    @Provides
+    @Singleton
+    fun provideJson(): Json = Json {
+        prettyPrint = true
+        encodeDefaults = true
+        ignoreUnknownKeys = true
     }
 }
 
