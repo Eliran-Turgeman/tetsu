@@ -6,14 +6,16 @@ import com.example.workoutlogger.domain.repository.SettingsRepository
 import java.io.OutputStream
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.encodeToStream
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToStream
 
 class ExportWorkoutJsonUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val settingsRepository: SettingsRepository,
     private val json: Json
 ) {
+    @OptIn(ExperimentalSerializationApi::class)
     suspend operator fun invoke(outputStream: OutputStream) {
         val sessions = sessionRepository.getAllSessions()
         val defaultUnit = settingsRepository.defaultWeightUnit.first()

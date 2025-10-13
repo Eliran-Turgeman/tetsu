@@ -1,7 +1,5 @@
 package com.example.workoutlogger.domain.importexport
 
-import java.io.Appendable
-
 internal class CsvWriter(
     private val appendable: Appendable,
     private val delimiter: Char = ','

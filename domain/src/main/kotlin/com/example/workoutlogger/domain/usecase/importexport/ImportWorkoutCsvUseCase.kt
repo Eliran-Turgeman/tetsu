@@ -75,7 +75,9 @@ class ImportWorkoutCsvUseCase @Inject constructor(
             val dateTime = runCatching { LocalDateTime.parse(dateString, strongFormatter) }.getOrNull()
                 ?: continue
             val workoutName = row.getOrNull(1)?.ifBlank { "Imported Workout" } ?: "Imported Workout"
-            val exerciseName = row.getOrNull(2)?.ifBlank { continue } ?: continue
+            val exerciseName = row.getOrNull(2)
+                ?.takeIf { it.isNotBlank() }
+                ?: continue
             val setOrder = row.getOrNull(3)?.toIntOrNull() ?: 1
             val weight = row.getOrNull(4)?.replace(',', '.')?.toDoubleOrNull()
             val weightUnit = row.getOrNull(5)?.toWeightUnit() ?: WeightUnit.KG

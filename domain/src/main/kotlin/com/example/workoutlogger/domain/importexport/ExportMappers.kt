@@ -75,6 +75,6 @@ private fun formatDuration(startedAt: Instant, endedAt: Instant?): String? {
     val parts = mutableListOf<String>()
     if (hours > 0) parts += "${hours}h"
     if (minutes > 0) parts += "${minutes}m"
-    if (seconds > 0 && hours == 0) parts += "${seconds}s"
+    if (seconds > 0 && hours.toInt() == 0) parts += "${seconds}s"
     return parts.joinToString(" ")
 }
