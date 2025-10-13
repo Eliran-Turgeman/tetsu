@@ -1,0 +1,60 @@
+name: Test & Coverage
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  test-and-cover:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run unit tests + coverage
+        run: ./gradlew testDebugUnitTest jacocoTestReport --stacktrace
+
+      - name: Upload HTML report (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-html
+          path: app/build/reports/jacoco/jacocoTestReport/html
+
+      - name: Compute coverage %
+        id: cov
+        run: |
+          python - << 'PY'
+          import xml.etree.ElementTree as ET
+          xml_path = "app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+          tree = ET.parse(xml_path)
+          root = tree.getroot()
+          covered = missed = 0
+          for c in root.iter('counter'):
+              if c.attrib.get('type') == 'INSTRUCTION':
+                  covered += int(c.attrib['covered'])
+                  missed  += int(c.attrib['missed'])
+          total = covered + missed
+          pct = 0.0 if total == 0 else 100.0 * covered / total
+          print(f"Coverage: {pct:.2f}%")
+          with open("${GITHUB_OUTPUT}", "a") as f:
+              f.write(f"percent={pct:.2f}\n")
+          PY
+
+      - name: Add Job Summary
+        run: |
+          echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Instruction coverage:** ${{ steps.cov.outputs.percent }}%" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The full HTML report is attached as an artifact named **jacoco-html**." >> $GITHUB_STEP_SUMMARY
