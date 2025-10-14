@@ -1,10 +1,12 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import org.gradle.testing.jacoco.tasks.JacocoReport
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    id("jacoco")
 }
 
 android {
@@ -56,6 +58,53 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests.all {
+            it.extensions.configure<org.gradle.testing.jacoco.plugins.JacocoTaskExtension> {
+                isIncludeNoLocationClasses = true
+                excludes = listOf("jdk.internal.*", "com.sun.*")
+            }
+        }
+    }
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
+        "**/*${'$'}ViewInjector*.*", "**/*${'$'}ViewBinder*.*",
+        "**/*_MembersInjector.class", "**/Hilt_*",
+        "**/*_Factory.*", "**/*_Provide*Factory*.*", "**/*_GeneratedInjector.*"
+    )
+
+    val buildDirPath = layout.buildDirectory.get().asFile
+
+    val kotlinClasses = fileTree(buildDirPath.resolve("tmp/kotlin-classes/debug")) {
+        exclude(fileFilter)
+    }
+    val javaClasses = fileTree(buildDirPath.resolve("intermediates/javac/debug/classes")) {
+        exclude(fileFilter)
+    }
+    classDirectories.setFrom(files(kotlinClasses, javaClasses))
+
+    sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
+
+    executionData.setFrom(
+        fileTree(buildDirPath) {
+            include(
+                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
+                "jacoco/testDebugUnitTest.exec",
+                "jacoco/test.exec"
+            )
+        }
+    )
 }
 
 dependencies {
@@ -101,6 +150,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.13.2")
+    testImplementation(kotlin("test"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     testImplementation("androidx.work:work-testing:2.9.0")
     testImplementation("androidx.test:core-ktx:1.5.0")
