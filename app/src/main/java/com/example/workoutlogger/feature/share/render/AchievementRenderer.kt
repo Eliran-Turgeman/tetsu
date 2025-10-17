@@ -1,12 +1,13 @@
 package com.example.workoutlogger.feature.share.render
 
+import android.graphics.RectF
 import android.text.TextPaint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.drawImageRect
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
 import com.example.workoutlogger.feature.share.data.PreparedAchievement
@@ -71,15 +72,18 @@ fun DrawScope.drawAchievements(area: Rect, config: AchievementRenderConfig) {
 
         val iconLeft = centerX - iconRadius
         val iconTop = iconCenterY - iconRadius
-        val iconRect = Rect(
-            left = iconLeft,
-            top = iconTop,
-            right = iconLeft + iconSize,
-            bottom = iconTop + iconSize
+        val iconRect = RectF(
+            iconLeft,
+            iconTop,
+            iconLeft + iconSize,
+            iconTop + iconSize
         )
-        drawImageRect(
-            image = achievement.icon,
-            dstRect = iconRect
+        val bitmap = achievement.icon.asAndroidBitmap()
+        drawContext.canvas.nativeCanvas.drawBitmap(
+            bitmap,
+            null,
+            iconRect,
+            null
         )
 
         val title = truncateName(achievement.name)

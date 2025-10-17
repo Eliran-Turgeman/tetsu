@@ -2,13 +2,13 @@ package com.example.workoutlogger.feature.share.render
 
 import android.graphics.Typeface
 import android.text.TextPaint
+import android.graphics.Paint
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
-import androidx.compose.ui.graphics.drawscope.drawRect
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Density
@@ -58,8 +58,12 @@ object ExportComposer {
         val subtitlePaint = createTextPaint(density, 14f, secondaryColor)
         val watermarkPaint = createTextPaint(density, 12f, secondaryColor.copy(alpha = 0.4f))
 
+        val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = background.toArgb()
+        }
+
         drawScope.draw(density, LayoutDirection.Ltr, canvas, Size(width.toFloat(), height.toFloat())) {
-            drawRect(color = background, size = size)
+            drawContext.canvas.nativeCanvas.drawRect(0f, 0f, size.width, size.height, backgroundPaint)
 
             val margin = 48.dp.toPx()
             val inner = Rect(margin, margin, size.width - margin, size.height - margin)

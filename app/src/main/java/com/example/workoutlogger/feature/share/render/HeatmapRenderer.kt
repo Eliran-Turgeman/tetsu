@@ -1,13 +1,13 @@
 package com.example.workoutlogger.feature.share.render
 
 import android.text.TextPaint
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.drawRect
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
 import com.example.workoutlogger.feature.share.data.HeatmapGrid
@@ -76,24 +76,32 @@ fun DrawScope.drawHeatmap(area: Rect, config: HeatmapRenderConfig) {
     }
 
     // Draw cells
-    config.grid.columns.forEachIndexed { columnIndex, column ->
-        column.forEachIndexed { rowIndex, cell ->
-            if (cell != null) {
-                val color = config.colors.getOrElse(cell.bucket) { config.colors.last() }
-                val left = startX + columnIndex * (cellSize + spacing)
-                val top = startY + rowIndex * (cellSize + spacing)
-                drawRect(
-                    color = color,
-                    topLeft = Offset(left, top),
-                    size = Size(cellSize, cellSize)
-                )
-                if (config.cellStrokeColor.alpha > 0f) {
-                drawRect(
-                    color = config.cellStrokeColor,
-                    topLeft = Offset(left, top),
-                    size = Size(cellSize, cellSize),
-                    style = Stroke(width = 1.dp.toPx())
-                )
+    val fillPaint = Paint().apply { isAntiAlias = true }
+    val strokePaint = Paint().apply {
+        isAntiAlias = true
+        style = PaintingStyle.Stroke
+        strokeWidth = 1.dp.toPx()
+        color = config.cellStrokeColor
+    }
+
+    drawIntoCanvas { canvas ->
+        config.grid.columns.forEachIndexed { columnIndex, column ->
+            column.forEachIndexed { rowIndex, cell ->
+                if (cell != null) {
+                    val color = config.colors.getOrElse(cell.bucket) { config.colors.last() }
+                    val left = startX + columnIndex * (cellSize + spacing)
+                    val top = startY + rowIndex * (cellSize + spacing)
+                    val rect = Rect(
+                        left = left,
+                        top = top,
+                        right = left + cellSize,
+                        bottom = top + cellSize
+                    )
+                    fillPaint.color = color
+                    canvas.drawRect(rect, fillPaint)
+                    if (config.cellStrokeColor.alpha > 0f) {
+                        canvas.drawRect(rect, strokePaint)
+                    }
                 }
             }
         }
