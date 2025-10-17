@@ -80,7 +80,7 @@ fun WorkoutLoggerAppRoot(startWorkoutId: Long? = null) {
                     tonalElevation = 0.dp
                 ) {
                     AppDestination.bottomDestinations.forEach { destination ->
-                        val selected = currentDestination?.route == destination.route
+                        val selected = currentDestination?.route?.startsWith(destination.route) == true
                         NavigationBarItem(
                             selected = selected,
                             onClick = { appState.navigateToBottomDestination(destination) },

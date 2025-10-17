@@ -35,7 +35,9 @@ fun ShareBottomSheet(
     onStateChange: (ShareSheetState) -> Unit,
     onPreview: () -> Unit,
     onShare: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isProcessing: Boolean = false,
+    shareEnabled: Boolean = true
 ) {
     Column(
         modifier = modifier
@@ -101,10 +103,18 @@ fun ShareBottomSheet(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Button(onClick = onPreview, modifier = Modifier.weight(1f)) {
+            Button(
+                onClick = onPreview,
+                modifier = Modifier.weight(1f),
+                enabled = !isProcessing
+            ) {
                 Text("Preview")
             }
-            Button(onClick = onShare, modifier = Modifier.weight(1f)) {
+            Button(
+                onClick = onShare,
+                modifier = Modifier.weight(1f),
+                enabled = shareEnabled && !isProcessing
+            ) {
                 Text("Share")
             }
         }

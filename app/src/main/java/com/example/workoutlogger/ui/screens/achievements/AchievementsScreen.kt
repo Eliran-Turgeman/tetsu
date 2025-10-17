@@ -30,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.EmojiEvents
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -55,10 +56,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,19 +74,30 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.workoutlogger.R
 import com.example.workoutlogger.domain.model.WorkoutSession
 import com.example.workoutlogger.domain.model.WeightUnit
 import com.example.workoutlogger.domain.model.WorkoutStatus
 import com.example.workoutlogger.domain.model.achievements.UserGoalKind
+import com.example.workoutlogger.feature.share.ShareConsistency
+import com.example.workoutlogger.feature.share.data.DailyCount
+import com.example.workoutlogger.feature.share.data.ImageFormat
+import com.example.workoutlogger.feature.share.data.PreparedAchievement
+import com.example.workoutlogger.feature.share.ui.ShareBottomSheet
+import com.example.workoutlogger.feature.share.ui.SharePreview
+import com.example.workoutlogger.feature.share.ui.ShareSheetState
 import com.example.workoutlogger.ui.components.PrimaryButton
 import com.example.workoutlogger.ui.components.SectionHeader
 import com.example.workoutlogger.ui.components.SecondaryButton
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -96,11 +111,29 @@ import kotlinx.datetime.toLocalDateTime
 fun AchievementsRoute(
     onOpenSession: (Long) -> Unit,
     onStartWorkout: () -> Unit,
+    openShareOnLaunch: Boolean = false,
     viewModel: AchievementsViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    var showShareSheet by rememberSaveable { mutableStateOf(false) }
+    var shareSheetState by remember { mutableStateOf(ShareSheetState()) }
+    val shareModalState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var isSharing by remember { mutableStateOf(false) }
+
+    val dailyCounts = remember(state.weeks) { buildDailyCounts(state.weeks) }
+    val preparedAchievements = rememberPreparedAchievements(state)
+    val canShare = dailyCounts.isNotEmpty()
+
+    LaunchedEffect(openShareOnLaunch) {
+        if (openShareOnLaunch) {
+            showShareSheet = true
+        }
+    }
 
     val showSheet = state.isGoalSheetOpen
 
@@ -111,8 +144,19 @@ fun AchievementsRoute(
         },
         floatingActionButton = {
             if (!showSheet) {
-                FloatingActionButton(onClick = viewModel::onFabClick) {
-                    Icon(imageVector = Icons.Rounded.Add, contentDescription = stringResource(id = R.string.achievements_fab_content_description))
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    FloatingActionButton(onClick = { showShareSheet = true }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Share,
+                            contentDescription = stringResource(id = R.string.achievements_share_content_description)
+                        )
+                    }
+                    FloatingActionButton(onClick = viewModel::onFabClick) {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = stringResource(id = R.string.achievements_fab_content_description)
+                        )
+                    }
                 }
             }
         },
@@ -159,12 +203,136 @@ fun AchievementsRoute(
         }
     }
 
+    if (showShareSheet) {
+        ModalBottomSheet(
+            sheetState = shareModalState,
+            onDismissRequest = { showShareSheet = false }
+        ) {
+            val request = shareSheetState.toRequest()
+            SharePreview(
+                request = request,
+                dailyCounts = dailyCounts,
+                achievements = preparedAchievements,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .height(220.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            ShareBottomSheet(
+                state = shareSheetState,
+                onStateChange = { shareSheetState = it },
+                onPreview = {},
+                onShare = {
+                    if (!canShare || isSharing) return@ShareBottomSheet
+                    coroutineScope.launch {
+                        isSharing = true
+                        val shareRequest = shareSheetState.toRequest()
+                        runCatching {
+                            val bitmap = ShareConsistency.render(shareRequest, dailyCounts, preparedAchievements)
+                            val uri = ShareConsistency.exportToCache(context, bitmap, ImageFormat.PNG)
+                            ShareConsistency.share(context, uri)
+                        }.onSuccess {
+                            runCatching { shareModalState.hide() }
+                            showShareSheet = false
+                        }.onFailure { throwable ->
+                            val message = throwable.message?.takeIf { it.isNotBlank() }
+                                ?: context.getString(R.string.share_export_error)
+                            snackbarHostState.showSnackbar(message)
+                        }
+                        isSharing = false
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                isProcessing = isSharing,
+                shareEnabled = canShare
+            )
+        }
+    }
+
     state.pendingDeletion?.let { pending ->
         ConfirmDeleteDialog(
             title = pending.title,
             onDismiss = viewModel::onDismissDelete,
             onConfirm = viewModel::onDeleteConfirmed
         )
+    }
+}
+
+private fun buildDailyCounts(weeks: List<HeatmapWeekUi>): List<DailyCount> {
+    return weeks.flatMap { it.days }
+        .map { day ->
+            DailyCount(
+                date = day.date.toJavaLocalDate(),
+                count = day.sessions.size
+            )
+        }
+        .sortedBy { it.date }
+}
+
+@Composable
+private fun rememberPreparedAchievements(state: AchievementsUiState): List<PreparedAchievement> {
+    val density = LocalDensity.current
+    val iconSize = with(density) { 56.dp.roundToPx().coerceAtLeast(48) }
+    return remember(state.completed, state.inProgress, iconSize) {
+        val generator = ShareIconGenerator(iconSize)
+        val completed = state.completed.map { badge ->
+            PreparedAchievement(
+                id = badge.instanceId,
+                name = badge.title,
+                icon = generator.iconFor(badge.iconKey),
+                achievedAt = badge.completedOn.toJavaLocalDate(),
+                category = badge.iconKey
+            )
+        }
+
+        val inProgress = state.inProgress.map { card ->
+            PreparedAchievement(
+                id = card.instanceId,
+                name = card.title,
+                icon = generator.iconFor(card.iconKey),
+                achievedAt = null,
+                tier = card.sort,
+                category = card.definitionId,
+                inProgressText = card.progressLabel.ifBlank { null }
+            )
+        }
+
+        completed + inProgress
+    }
+}
+
+private class ShareIconGenerator(private val sizePx: Int) {
+    private val cache = mutableMapOf<String, ImageBitmap>()
+
+    fun iconFor(key: String): ImageBitmap {
+        val cacheKey = key.ifBlank { "default" }
+        return cache.getOrPut(cacheKey) { createBitmap(cacheKey) }
+    }
+
+    private fun createBitmap(key: String): ImageBitmap {
+        val bitmap = ImageBitmap(sizePx, sizePx)
+        val canvas = android.graphics.Canvas(bitmap.asAndroidBitmap())
+        val backgroundPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            color = colorFromKey(key)
+        }
+        canvas.drawCircle(sizePx / 2f, sizePx / 2f, sizePx / 2f, backgroundPaint)
+
+        val textPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.WHITE
+            textAlign = android.graphics.Paint.Align.CENTER
+            textSize = sizePx * 0.6f
+        }
+        val textBaseline = sizePx / 2f - (textPaint.descent() + textPaint.ascent()) / 2f
+        canvas.drawText("🏆", sizePx / 2f, textBaseline, textPaint)
+        return bitmap
+    }
+
+    private fun colorFromKey(key: String): Int {
+        val hash = key.hashCode()
+        val hue = ((hash % 360) + 360) % 360
+        val hsv = floatArrayOf(hue.toFloat(), 0.6f, 0.85f)
+        return android.graphics.Color.HSVToColor(hsv)
     }
 }
 

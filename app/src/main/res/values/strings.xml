@@ -68,6 +68,7 @@
     <string name="label_status_cancelled">Cancelled</string>
     <string name="label_settings_notifications">Notifications</string>
     <string name="label_settings_data">Data</string>
+    <string name="label_share_consistency">Share my consistency</string>
     <string name="label_export_strong_csv">Export Strong/Hevy CSV</string>
     <string name="label_export_fitnotes_csv">Export FitNotes iOS CSV</string>
     <string name="label_export_json_backup">Export JSON backup</string>
@@ -106,6 +107,7 @@
     <string name="notification_goal_deadline_body">Only a few days left (due %1$s). You’ve got this!</string>
     <string name="notification_goal_deadline_format">MMM d</string>
     <string name="achievements_fab_content_description">Create goal</string>
+    <string name="achievements_share_content_description">Share consistency</string>
     <string name="achievements_in_progress_title">In progress</string>
     <string name="achievements_completed_title">Completed badges</string>
     <string name="achievements_day_summary_title">Sessions on %1$s</string>
@@ -152,6 +154,7 @@
     <string name="achievements_error_streak">Enter the streak length.</string>
     <string name="achievements_error_minutes">Enter the minutes target.</string>
     <string name="achievements_error_submission">Couldn’t save the goal. Try again.</string>
+    <string name="share_export_error">Couldn’t share export. Try again.</string>
     <string name="achievements_status_active">Active</string>
     <string name="achievements_status_completed">Completed</string>
     <string name="achievements_status_cancelled">Cancelled</string>

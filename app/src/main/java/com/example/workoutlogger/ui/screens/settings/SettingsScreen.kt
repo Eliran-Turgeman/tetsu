@@ -51,6 +51,7 @@ import com.example.workoutlogger.ui.components.SegmentedControl
 @Composable
 fun SettingsRoute(
     onOpenNotificationSettings: () -> Unit,
+    onOpenShareConsistency: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -166,7 +167,8 @@ fun SettingsRoute(
         onExportStrongCsv = { fileName -> exportStrongLauncher.launch(fileName) },
         onExportFitNotesCsv = { fileName -> exportFitNotesLauncher.launch(fileName) },
         onExportJson = { fileName -> exportJsonLauncher.launch(fileName) },
-        onImportData = { importLauncher.launch(supportedImportMimeTypes) }
+        onImportData = { importLauncher.launch(supportedImportMimeTypes) },
+        onShareConsistency = onOpenShareConsistency
     )
 }
 
@@ -189,7 +191,8 @@ private fun SettingsScreen(
     onExportStrongCsv: (String) -> Unit,
     onExportFitNotesCsv: (String) -> Unit,
     onExportJson: (String) -> Unit,
-    onImportData: () -> Unit
+    onImportData: () -> Unit,
+    onShareConsistency: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val units = remember { WeightUnit.values() }
@@ -261,6 +264,11 @@ private fun SettingsScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         SectionHeader(title = stringResource(id = R.string.label_settings_data))
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            SecondaryButton(
+                                text = stringResource(id = R.string.label_share_consistency),
+                                onClick = onShareConsistency,
+                                enabled = !state.isProcessing
+                            )
                             SecondaryButton(
                                 text = stringResource(id = R.string.label_export_strong_csv),
                                 onClick = {
