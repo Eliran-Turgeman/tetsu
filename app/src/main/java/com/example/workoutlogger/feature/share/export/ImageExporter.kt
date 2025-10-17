@@ -25,6 +25,19 @@ object ImageExporter {
         bitmap: ImageBitmap,
         format: ImageFormat
     ): Uri {
+        val file = exportToCacheFile(context, bitmap, format)
+        return FileProvider.getUriForFile(
+            context,
+            context.packageName + ".fileprovider",
+            file
+        )
+    }
+
+    internal fun exportToCacheFile(
+        context: Context,
+        bitmap: ImageBitmap,
+        format: ImageFormat
+    ): File {
         val cacheDir = File(context.cacheDir, "exports").apply { mkdirs() }
         val timestamp = java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss", Locale.US))
         val extension = if (format == ImageFormat.PNG) "png" else "jpg"
@@ -45,11 +58,7 @@ object ImageExporter {
             exif.saveAttributes()
         }
 
-        return FileProvider.getUriForFile(
-            context,
-            context.packageName + ".fileprovider",
-            file
-        )
+        return file
     }
 
     fun share(context: Context, uri: Uri, mime: String) {
