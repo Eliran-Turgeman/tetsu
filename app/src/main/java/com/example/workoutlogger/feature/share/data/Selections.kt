@@ -54,5 +54,13 @@ data class HeatmapExportRequest(
     val achievements: AchievementSelection
 )
 
-enum class ImageFormat { PNG, JPEG }
+enum class ImageFormat {
+    PNG,
+    JPEG;
+
+    fun mimeType(): String = when (this) {
+        PNG -> "image/png"
+        JPEG -> "image/jpeg"
+    }
+}
 

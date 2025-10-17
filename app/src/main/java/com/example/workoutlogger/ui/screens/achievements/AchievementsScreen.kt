@@ -228,10 +228,12 @@ fun AchievementsRoute(
                     coroutineScope.launch {
                         isSharing = true
                         val shareRequest = shareSheetState.toRequest()
+                        val format = ImageFormat.PNG
+                        val mime = format.mimeType()
                         runCatching {
                             val bitmap = ShareConsistency.render(shareRequest, dailyCounts, preparedAchievements)
-                            val uri = ShareConsistency.exportToCache(context, bitmap, ImageFormat.PNG)
-                            ShareConsistency.share(context, uri)
+                            val uri = ShareConsistency.exportToCache(context, bitmap, format)
+                            ShareConsistency.share(context, uri, mime)
                         }.onSuccess {
                             runCatching { shareModalState.hide() }
                             showShareSheet = false
