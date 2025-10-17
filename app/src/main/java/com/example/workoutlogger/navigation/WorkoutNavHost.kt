@@ -83,14 +83,22 @@ fun WorkoutNavHost(
             )
         }
 
-        composable(AppDestination.Heatmap.route) {
+        composable(
+            route = AppDestination.Heatmap.route + "?openShare={openShare}",
+            arguments = listOf(navArgument("openShare") {
+                type = NavType.BoolType
+                defaultValue = false
+            })
+        ) { backStackEntry ->
+            val openShare = backStackEntry.arguments?.getBoolean("openShare") ?: false
             AchievementsRoute(
                 onOpenSession = { sessionId ->
                     navController.navigate(AppDestination.session(sessionId))
                 },
                 onStartWorkout = {
                     navController.navigateBottom(AppDestination.Templates.route)
-                }
+                },
+                openShareOnLaunch = openShare
             )
         }
 
@@ -102,6 +110,9 @@ fun WorkoutNavHost(
                         putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
                     }
                     context.startActivity(intent)
+                },
+                onOpenShareConsistency = {
+                    navController.navigateBottom(AppDestination.Heatmap.route + "?openShare=true")
                 }
             )
         }
