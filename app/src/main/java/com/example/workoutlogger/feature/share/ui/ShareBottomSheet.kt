@@ -2,10 +2,13 @@ package com.example.workoutlogger.feature.share.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -35,16 +38,22 @@ fun ShareBottomSheet(
     onStateChange: (ShareSheetState) -> Unit,
     onPreview: () -> Unit,
     onShare: () -> Unit,
+    previewContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     isProcessing: Boolean = false,
     shareEnabled: Boolean = true
 ) {
+    val scrollState = rememberScrollState()
     Column(
         modifier = modifier
-            .verticalScroll(rememberScrollState())
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .verticalScroll(scrollState)
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        previewContent()
+
         Text(
             text = "Share my consistency",
             style = MaterialTheme.typography.titleLarge
@@ -141,6 +150,7 @@ data class ShareSheetState(
 private data class OptionItem<T>(val label: String, val value: T)
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun <T> OptionSection(
     title: String,
     options: List<OptionItem<T>>,
@@ -149,13 +159,16 @@ private fun <T> OptionSection(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(text = title, style = MaterialTheme.typography.titleMedium)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             options.forEach { option ->
                 FilterChip(
                     selected = option.value == selected,
                     onClick = { onSelect(option.value) },
-                    label = { Text(option.label) },
-                    modifier = Modifier
+                    label = { Text(option.label) }
                 )
             }
         }
@@ -171,6 +184,9 @@ private fun ShareBottomSheetPreview() {
         onStateChange = { state = it },
         onPreview = {},
         onShare = {},
+        previewContent = {
+            Spacer(modifier = Modifier.height(8.dp))
+        },
         modifier = Modifier.fillMaxWidth()
     )
 }

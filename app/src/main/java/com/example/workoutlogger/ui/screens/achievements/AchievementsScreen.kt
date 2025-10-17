@@ -209,16 +209,6 @@ fun AchievementsRoute(
             onDismissRequest = { showShareSheet = false }
         ) {
             val request = shareSheetState.toRequest()
-            SharePreview(
-                request = request,
-                dailyCounts = dailyCounts,
-                achievements = preparedAchievements,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .height(220.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
             ShareBottomSheet(
                 state = shareSheetState,
                 onStateChange = { shareSheetState = it },
@@ -245,7 +235,18 @@ fun AchievementsRoute(
                         isSharing = false
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
+                previewContent = {
+                    SharePreview(
+                        request = request,
+                        dailyCounts = dailyCounts,
+                        achievements = preparedAchievements,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(220.dp)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth(),
                 isProcessing = isSharing,
                 shareEnabled = canShare
             )
