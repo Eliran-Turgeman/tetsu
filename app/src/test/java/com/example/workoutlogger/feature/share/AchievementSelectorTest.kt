@@ -1,19 +1,27 @@
 package com.example.workoutlogger.feature.share
 
+import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import com.example.workoutlogger.feature.share.data.AchievementSelection
 import com.example.workoutlogger.feature.share.data.PreparedAchievement
 import com.example.workoutlogger.feature.share.data.selectAchievements
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.time.LocalDate
 
+@RunWith(RobolectricTestRunner::class)
 class AchievementSelectorTest {
+
+    private fun placeholderIcon(): ImageBitmap =
+        Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888).asImageBitmap()
 
     @Test
     fun `auto selection prioritises recency and diversity`() {
         val baseDate = LocalDate.of(2024, 6, 1)
-        val icon = ImageBitmap(32, 32)
+        val icon = placeholderIcon()
         val achievements = listOf(
             PreparedAchievement("a", "Alpha", icon, baseDate.minusDays(1), tier = 1, category = "strength"),
             PreparedAchievement("b", "Bravo", icon, baseDate.minusDays(2), tier = 2, category = "strength"),
@@ -32,7 +40,7 @@ class AchievementSelectorTest {
 
     @Test
     fun `manual selection keeps ordering`() {
-        val icon = ImageBitmap(32, 32)
+        val icon = placeholderIcon()
         val achievements = listOf(
             PreparedAchievement("a", "Alpha", icon, null),
             PreparedAchievement("b", "Bravo", icon, null),
